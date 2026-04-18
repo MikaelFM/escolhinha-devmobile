@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "dev-mobile",
-    "slug": "dev-mobile",
+    "slug": "devmobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,10 +20,22 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "package": "com.anonymous.devmobile",
+      "googleServicesFile": "./google-services.json"
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#ffffff",
+      "barStyle": "dark-content"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5586ee22-338a-449e-a5bb-3b120bbb930e"
+      }
+    },
+    "owner": "mikaelfms-organization"
   }
 }
