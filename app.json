@@ -25,8 +25,8 @@
       "googleServicesFile": "./google-services.json"
     },
     "androidNavigationBar": {
-      "backgroundColor": "#ffffff",
-      "barStyle": "dark-content"
+      "backgroundColor": "#000000",
+      "buttonColor": "white"
     },
     "web": {
       "favicon": "./assets/favicon.png"
