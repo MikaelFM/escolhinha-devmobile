@@ -332,30 +332,31 @@ export default function ListaAlunos() {
         </ScrollView>
       </View>
 
-      <View style={styles.secaoHeader}>
-        <Text style={styles.secaoTitulo}>
-          {tabAtiva === 'Todos' ? 'Todos os alunos' : `Filtrando: ${tabAtiva}`}
-        </Text>
-        <Text style={styles.contadorAlunos}>{paginacao.totalItens} alunos</Text>
-      </View>
+      <View style={styles.bottomSheet}>
+        <View style={styles.secaoHeader}>
+          <Text style={styles.secaoTitulo}>
+            {tabAtiva === 'Todos' ? 'Todos os alunos' : `Filtrando: ${tabAtiva}`}
+          </Text>
+          <Text style={styles.contadorAlunos}>{paginacao.totalItens} alunos</Text>
+        </View>
 
-      {erro ? (
-        <View style={styles.erroContainer}>
-          <Ionicons name="alert-circle" size={48} color="#dc2626" />
-          <Text style={styles.erroTexto}>{erro}</Text>
-          <TouchableOpacity
-            style={styles.botaoTentar}
-            onPress={() => carregarAlunos({ page: 1, append: false })}
-          >
-            <Text style={styles.botaoTentarTexto}>Tentar novamente</Text>
-          </TouchableOpacity>
-        </View>
-      ) : carregandoInicial ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.azul} />
-          <Text style={styles.loadingText}>Carregando dados...</Text>
-        </View>
-      ) : (
+        {erro ? (
+          <View style={styles.erroContainer}>
+            <Ionicons name="alert-circle" size={48} color="#dc2626" />
+            <Text style={styles.erroTexto}>{erro}</Text>
+            <TouchableOpacity
+              style={styles.botaoTentar}
+              onPress={() => carregarAlunos({ page: 1, append: false })}
+            >
+              <Text style={styles.botaoTentarTexto}>Tentar novamente</Text>
+            </TouchableOpacity>
+          </View>
+        ) : carregandoInicial ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primaryMedium} />
+            <Text style={styles.loadingText}>Carregando dados...</Text>
+          </View>
+        ) : (
           <FlatList
             data={alunos}
             keyExtractor={(item, index) => String(item?.rg_aluno || item?.rg || index) + '-' + index}
@@ -367,7 +368,7 @@ export default function ListaAlunos() {
             ListFooterComponent={
               carregandoMais ? (
                 <View style={styles.footerLoading}>
-                  <ActivityIndicator size="small" color={colors.azul} />
+                  <ActivityIndicator size="small" color={colors.primaryMedium} />
                 </View>
               ) : null
             }
@@ -379,7 +380,8 @@ export default function ListaAlunos() {
               </View>
             }
           />
-      )}
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -387,7 +389,7 @@ export default function ListaAlunos() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.background,
     paddingBottom: 80
   },
   header: {
@@ -397,21 +399,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 25,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
   },
   titulo: { 
     fontSize: 28, 
     fontWeight: '800', 
-    color: colors.azul,
+    color: colors.primaryMedium,
     letterSpacing: -1
   },
-  subSaudacao: { 
-    fontSize: 14, 
-    color: '#94a3b8', 
-    fontWeight: '600' 
-  },
   botaoAdicionar: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primaryMedium,
     width: 48, 
     height: 48, 
     borderRadius: 14, 
@@ -421,37 +418,49 @@ const styles = StyleSheet.create({
   buscaWrapper: {
     flexDirection: 'row', 
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 16,
-    marginHorizontal: 20, 
-    marginTop: 15, 
+    marginHorizontal: 20,
     paddingHorizontal: 15,
     height: 55, 
     borderWidth: 1, 
-    borderColor: '#e2e8f0',
+    borderColor: colors.primaryBorder,
   },
-  buscaInput: { flex: 1, fontSize: 15, color: '#1e293b', marginLeft: 10 },
+  buscaInput: { flex: 1, fontSize: 15, color: colors.primaryDark, marginLeft: 10 },
   tabsContainer: { paddingHorizontal: 20, gap: 8, alignItems: 'center' },
   tab: {
     height: 38, 
     paddingHorizontal: 18, 
     borderRadius: 20,
     borderWidth: 1, 
-    borderColor: '#e2e8f0', 
+    borderColor: colors.primaryBorder, 
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   tabAtiva: { 
-    backgroundColor: colors.azul, 
-    borderColor: colors.azul 
+    backgroundColor: colors.primaryMedium, 
+    borderColor: colors.primaryMedium 
   },
   tabTexto: { 
     fontSize: 13, 
     fontWeight: '600', 
-    color: '#64748b' 
+    color: colors.textSecondary 
   },
   tabTextoAtivo: { 
     color: '#ffffff' 
+  },
+  bottomSheet: {
+    flex: 1,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: 8,
+    paddingTop: 8,
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -8 },
+    elevation: 20,
   },
   secaoHeader: {
     flexDirection: 'row', 
@@ -470,43 +479,46 @@ const styles = StyleSheet.create({
   contadorAlunos: { 
     fontSize: 11, 
     fontWeight: '700', 
-    color: colors.azul 
+    color: colors.primaryMedium,
   },
   lista: { 
     paddingHorizontal: 20, 
     paddingBottom: 40 
   },
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 16, 
     padding: 16, 
     marginBottom: 12,
-    borderWidth: 1, 
-    borderColor: '#e2e8f0',
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center' },
   avatar: { 
     width: 48, 
     height: 48, 
     borderRadius: 12, 
-    backgroundColor: '#f1f5f9', 
+    backgroundColor: colors.primaryLight,
     alignItems: 'center', 
     justifyContent: 'center' 
   },
   avatarTexto: { 
     fontSize: 16, 
     fontWeight: '800', 
-    color: colors.azul 
+    color: colors.primaryMedium 
   },
   infoPrincipal: { flex: 1, marginLeft: 12 },
   nomeAluno: { 
     fontSize: 16, 
     fontWeight: '800', 
-    color: colors.azul 
+    color: colors.primaryDark
   },
   categoriaTexto: { 
     fontSize: 12, 
-    color: '#94a3b8', 
+    color: colors.textSecondary, 
     marginTop: 2 
   },
   statusBadge: { 
@@ -545,7 +557,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: colors.azul,
+    color: colors.primaryMedium,
     fontWeight: '600',
   },
   erroContainer: {
@@ -562,7 +574,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   botaoTentar: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primaryMedium,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

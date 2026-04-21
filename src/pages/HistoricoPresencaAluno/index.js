@@ -155,31 +155,33 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
           </View>
         </View>
 
-        <Text style={styles.secaoTitulo}>HISTÓRICO DE AULAS</Text>
+        <View style={styles.bottomSheet}>
+          <Text style={styles.secaoTitulo}>HISTÓRICO DE AULAS</Text>
 
-        <View style={styles.listaContainer}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size='large' color={colors.azul} />
-              <Text style={styles.loadingText}>Carregando histórico...</Text>
-            </View>
-          ) : error ? (
-            <View style={styles.errorContainer}>
-              <Ionicons name='alert-circle' size={48} color={VERMELHO} />
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : historico.length > 0 ? (
-            historico.map((item) => <PresencaItem key={item.id} item={item} />)
-          ) : (
-            <Text style={styles.vazioTexto}>Nenhum registro</Text>
-          )}
-        </View>
+          <View style={styles.listaContainer}>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size='large' color={colors.primary} />
+                <Text style={styles.loadingText}>Carregando histórico...</Text>
+              </View>
+            ) : error ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name='alert-circle' size={48} color={VERMELHO} />
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : historico.length > 0 ? (
+              historico.map((item) => <PresencaItem key={item.id} item={item} />)
+            ) : (
+              <Text style={styles.vazioTexto}>Nenhum registro</Text>
+            )}
+          </View>
 
-        <View style={styles.infoFooter}>
-          <Ionicons name='information-circle-outline' size={16} color='#94a3b8' />
-          <Text style={styles.infoFooterTexto}>
-            Em caso de divergência na frequência, entre em contato com a secretaria da escolinha.
-          </Text>
+          <View style={styles.infoFooter}>
+            <Ionicons name='information-circle-outline' size={16} color={colors.textPlaceholder} />
+            <Text style={styles.infoFooterTexto}>
+              Em caso de divergência na frequência, entre em contato com a secretaria da escolinha.
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -187,29 +189,41 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
+  container: { flex: 1, backgroundColor: colors.background },
+  bottomSheet: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: 8,
+    paddingTop: 12,
+    paddingBottom: 24,
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -8 },
+    elevation: 20,
+  },
   header: { paddingHorizontal: 20, paddingTop: 60, marginBottom: 20 },
-  backBtn: { marginLeft: -10, marginBottom: 10 },
-  titulo: { fontSize: 25, fontWeight: '800', color: colors.azul, letterSpacing: -0.5 },
-  subtitulo: { fontSize: 14, color: '#94a3b8', marginTop: 4 },
+  titulo: { fontSize: 25, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 },
+  subtitulo: { fontSize: 14, color: colors.textPlaceholder, marginTop: 4 },
 
   resumoCard: {
     flexDirection: 'row',
     marginHorizontal: 20,
     padding: 20,
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     marginBottom: 25,
   },
   resumoItem: { flex: 1, alignItems: 'center' },
-  resumoLabel: { fontSize: 9, fontWeight: '900', color: '#94a3b8', letterSpacing: 1, marginBottom: 5 },
-  resumoValor: { fontSize: 18, fontWeight: '800', color: colors.azul },
+  resumoLabel: { fontSize: 9, fontWeight: '900', color: colors.textPlaceholder, letterSpacing: 1, marginBottom: 5 },
+  resumoValor: { fontSize: 18, fontWeight: '800', color: colors.primary },
   divisor: { width: 1, backgroundColor: '#e2e8f0', height: '100%' },
 
   secaoTitulo: {
-    fontSize: 11, fontWeight: '900', color: '#94a3b8',
+    fontSize: 11, fontWeight: '900', color: colors.textPlaceholder,
     marginLeft: 20, marginBottom: 15, letterSpacing: 1,
   },
 
@@ -235,7 +249,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dataTitulo: { fontSize: 16, fontWeight: '700', color: colors.azul },
+  dataTitulo: { fontSize: 16, fontWeight: '700', color: colors.primary },
 
   statusBadge: {
     paddingHorizontal: 10,
@@ -245,10 +259,10 @@ const styles = StyleSheet.create({
   statusTexto: { fontSize: 10, fontWeight: '900' },
 
   loadingContainer: { paddingVertical: 25, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { marginTop: 10, color: '#64748b', fontSize: 13, fontWeight: '600' },
+  loadingText: { marginTop: 10, color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
   errorContainer: { paddingVertical: 25, alignItems: 'center', justifyContent: 'center' },
   errorText: { marginTop: 10, color: VERMELHO, fontSize: 13, fontWeight: '600', textAlign: 'center' },
-  vazioTexto: { color: '#94a3b8', fontSize: 13, fontWeight: '600', paddingVertical: 12 },
+  vazioTexto: { color: colors.textPlaceholder, fontSize: 13, fontWeight: '600', paddingVertical: 12 },
 
   infoFooter: {
     flexDirection: 'row',
@@ -258,5 +272,5 @@ const styles = StyleSheet.create({
     gap: 8,
     opacity: 0.7,
   },
-  infoFooterTexto: { fontSize: 11, color: '#64748b', flex: 1, lineHeight: 16 },
+  infoFooterTexto: { fontSize: 11, color: colors.textSecondary, flex: 1, lineHeight: 16 },
 });

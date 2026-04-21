@@ -6,7 +6,8 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
+  StatusBar
 } from 'react-native';
 import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,9 +37,9 @@ export default function DashboardAluno() {
 
   const nomeAluno = userData?.nome || aluno.nome;
 
-  const InfoCard = ({ titulo, valor, icone, corIcone, bgIcone }) => (
+  const InfoCard = ({ titulo, valor, icone, corIcone }) => (
     <View style={styles.cardResumo}>
-      <View style={[styles.iconContainer, { backgroundColor: bgIcone }]}>
+      <View style={styles.iconContainer}>
         <Ionicons name={icone} size={22} color={corIcone} />
       </View>
       <View>
@@ -48,98 +49,55 @@ export default function DashboardAluno() {
     </View>
   );
 
+  const AtalhoItem = ({ icone, titulo, rota, ultimo = false }) => (
+    <TouchableOpacity
+      style={[styles.btnAcao, ultimo && styles.btnAcaoUltimo]}
+      onPress={() => navigation.navigate(rota)}
+      activeOpacity={0.75}
+    >
+      <View style={styles.iconWrapperAtalho}>
+        <Ionicons name={icone} size={20} color={colors.primary} />
+      </View>
+      <View style={styles.btnAcaoConteudo}>
+        <Text style={styles.btnAcaoTexto}>{titulo}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={colors.primaryAccent} />
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header com Seletor de Perfil (Caso tenha mais de um filho) */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.saudacao}>Olá, {nomeAluno}</Text>
-          <View style={styles.perfilSelector}>
-             <TouchableOpacity style={styles.btnTrocar}>
-                <Text style={styles.nomeAlunoHeader}>{aluno.nome} ▾</Text>
-             </TouchableOpacity>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.btnNotificacao}>
-          <Ionicons name="notifications-outline" size={24} color={colors.azul} />
-          {aluno.statusMensalidade === 'Pendente' && <View style={styles.badgeNotificacao} />}
-        </TouchableOpacity>
-      </View>
+      <StatusBar barStyle="dark-content" />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        
-        {/* Grid de Stats de Frequência (RF011) */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 60, paddingBottom: 30, flexGrow: 1 }}>
+        <View style={styles.topHeader}>
+          <Text style={styles.saudacao}>Olá, {nomeAluno}</Text>
+          <Text style={styles.subSaudacao}>Confira seu desempenho e suas pendências.</Text>
+        </View>
+
         <View style={styles.gridStats}>
           <InfoCard 
             titulo="Frequência" 
             valor={aluno.frequencia} 
             icone="trending-up" 
             corIcone={VERDE} 
-            bgIcone="#f0fdf4" 
           />
           <InfoCard 
             titulo="Presenças" 
             valor={`${aluno.presencasNoMes}/${aluno.totalAulasMes}`} 
             icone="calendar" 
-            corIcone={colors.azul} 
-            bgIcone={AZUL_CLARO} 
+            corIcone={colors.primary} 
           />
         </View>
 
-        {/* Card Financeiro - Foco em Pagamento (RF016/RF017) */}
-        <View style={[styles.cardFinanceiro, aluno.statusMensalidade === 'Pendente' ? {backgroundColor: LARANJA} : {backgroundColor: VERDE}]}>
-          <View>
-            <Text style={styles.finLabel}>Mensalidade de Abril</Text>
-            <Text style={styles.finValor}>{aluno.valorMensalidade}</Text>
-            <Text style={styles.finVencimento}>Vence em {aluno.vencimento}</Text>
+        <View style={styles.bottomSheet}>
+          <Text style={styles.secaoTitulo}>AÇÕES RÁPIDAS</Text>
+          <View style={styles.gridAcoes}>
+            <AtalhoItem icone="list-outline" titulo="Minhas Faltas" rota="HistoricoPresencas" />
+            <AtalhoItem icone="time-outline" titulo="Horários" rota="GradeHorarios" />
+            <AtalhoItem icone="document-text-outline" titulo="Recibos" rota="Recibos" ultimo />
           </View>
-          <TouchableOpacity 
-            style={styles.btnPagar}
-            onPress={() => navigation.navigate('PagamentoPix')}
-          >
-            <Text style={styles.btnPagarTexto}>
-                {aluno.statusMensalidade === 'Pendente' ? 'PAGAR PIX' : 'PAGO'}
-            </Text>
-            <Ionicons name={aluno.statusMensalidade === 'Pendente' ? "copy-outline" : "checkmark-circle"} size={16} color={aluno.statusMensalidade === 'Pendente' ? LARANJA : VERDE} />
-          </TouchableOpacity>
         </View>
-
-        {/* Seção de Ações Rápidas do Aluno */}
-        <Text style={styles.secaoTitulo}>MINHA ESCOLINHA</Text>
-        <View style={styles.gridAcoes}>
-          <TouchableOpacity style={styles.btnAcao} onPress={() => navigation.navigate('HistoricoPresencas')}>
-            <Ionicons name="list-outline" size={32} color={colors.azul} />
-            <Text style={styles.btnAcaoTexto}>Minhas Faltas</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.btnAcao} onPress={() => navigation.navigate('GradeHorarios')}>
-            <Ionicons name="time-outline" size={32} color={colors.azul} />
-            <Text style={styles.btnAcaoTexto}>Horários</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.btnAcao} onPress={() => navigation.navigate('Recibos')}>
-            <Ionicons name="document-text-outline" size={32} color={colors.azul} />
-            <Text style={styles.btnAcaoTexto}>Recibos</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Próximas Aulas / Mural de Avisos */}
-        {/* <View style={styles.secaoHeader}>
-          <Text style={styles.secaoTitulo}>MURAL DE AVISOS</Text>
-        </View> */}
-        
-        {/* <View style={styles.listaAlerta}>
-          <View style={styles.itemAviso}>
-             <View style={styles.avisoIcon}>
-                <Ionicons name="megaphone" size={20} color={colors.azul} />
-             </View>
-             <View style={{flex: 1}}>
-                <Text style={styles.avisoTitulo}>Treino Cancelado (Chuva)</Text>
-                <Text style={styles.avisoData}>Hoje, às 14:30</Text>
-                <Text style={styles.avisoDesc}>O treino da categoria Sub-13 foi cancelado devido às fortes chuvas. Reposição em breve.</Text>
-             </View>
-          </View>
-        </View> */}
 
       </ScrollView>
     </SafeAreaView>
@@ -147,87 +105,87 @@ export default function DashboardAluno() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
-  header: {
+  container: { flex: 1, backgroundColor: colors.background },
+  topHeader: {
+    marginTop: 70,
+    paddingHorizontal: 20,
+    marginBottom: 30,
+  },
+  saudacao: { fontSize: 26, fontWeight: '800', color: colors.primaryMedium },
+  subSaudacao: { fontSize: 15, color: colors.textSecondary, marginTop: 4 },
+  gridStats: { 
     flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 80,
-    backgroundColor: '#ffffff',
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+    justifyContent: 'space-between',
   },
-  saudacao: { fontSize: 16, fontWeight: '500', color: '#64748b' },
-  perfilSelector: { flexDirection: 'row', alignItems: 'center' },
-  nomeAlunoHeader: { fontSize: 18, fontWeight: '800', color: colors.azul },
-  btnTrocar: { paddingVertical: 2 },
-  btnNotificacao: {
-    width: 45, height: 45, borderRadius: 12, backgroundColor: '#f1f5f9',
-    alignItems: 'center', justifyContent: 'center'
-  },
-  badgeNotificacao: {
-    position: 'absolute', top: 12, right: 14, width: 8, height: 8,
-    borderRadius: 4, backgroundColor: VERMELHO, borderWidth: 1, borderColor: '#fff'
-  },
-  gridStats: { flexDirection: 'row', padding: 20, justifyContent: 'space-between' },
   cardResumo: {
     width: (width / 2) - 28,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: colors.primaryBorder,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12
   },
-  iconContainer: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  cardLabel: { fontSize: 10, fontWeight: '700', color: '#64748b', textTransform: 'uppercase' },
-  cardValor: { fontSize: 18, fontWeight: '800', color: colors.azul },
-  cardFinanceiro: {
+  iconContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  cardLabel: { fontSize: 10, fontWeight: '700', color: colors.textPlaceholder, textTransform: 'uppercase' },
+  cardValor: { fontSize: 20, fontWeight: '800', color: colors.primaryDark },
+  bottomSheet: {
+    flex: 1,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: 10,
+    paddingTop: 10,
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -8 },
+    elevation: 20,
+  },
+  secaoTitulo: { fontSize: 12, fontWeight: '800', color: colors.textSecondary, letterSpacing: 1, marginLeft: 20, marginTop: 24 },
+  gridAcoes: {
+    flexDirection: 'column',
     marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'   
+    marginTop: 14,
+    backgroundColor: 'transparent',
   },
-  finLabel: { color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '600' },
-  finValor: { color: '#fff', fontSize: 24, fontWeight: '800' },
-  finVencimento: { color: '#fff', fontSize: 11, opacity: 0.9 },
-  btnPagar: { 
-    backgroundColor: '#fff', 
-    paddingHorizontal: 12, 
-    paddingVertical: 10, 
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5
-  },
-  btnPagarTexto: { fontSize: 12, fontWeight: '900' },
-
-  secaoHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginTop: 25 },
-  secaoTitulo: { fontSize: 12, fontWeight: '800', color: '#94a3b8', letterSpacing: 1, marginLeft: 20, marginTop: 25 },
-
-  gridAcoes: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 15 },
   btnAcao: {
-    width: (width / 3) - 22,
-    backgroundColor: '#fff',
-    paddingVertical: 20,
-    borderRadius: 16,
+    width: '100%',
+    paddingVertical: 15,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e2e8f0'
+    gap: 12,
+    backgroundColor: colors.backgroundSecondary,
+    borderRadius: 16,
+    marginBottom: 10,
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1,
   },
-  btnAcaoTexto: { fontSize: 11, fontWeight: '700', color: colors.azul, marginTop: 8 },
-
-  listaAlerta: { marginHorizontal: 20, marginTop: 15 },
-  itemAviso: { 
-    backgroundColor: '#fff', padding: 16, borderRadius: 16,
-    flexDirection: 'row', gap: 15,
-    borderWidth: 1, borderColor: '#f1f5f9'
+  iconWrapperAtalho: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  avisoIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: AZUL_CLARO, alignItems: 'center', justifyContent: 'center' },
-  avisoTitulo: { fontSize: 15, fontWeight: '700', color: colors.azul },
-  avisoData: { fontSize: 11, color: LARANJA, fontWeight: '700', marginBottom: 5 },
-  avisoDesc: { fontSize: 13, color: '#64748b', lineHeight: 18 }
+  btnAcaoConteudo: { flex: 1, marginLeft: 2 },
+  btnAcaoUltimo: { marginBottom: 0 },
+  btnAcaoTexto: { fontSize: 15, fontWeight: '700', color: colors.primaryDark },
 });

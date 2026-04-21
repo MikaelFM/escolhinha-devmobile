@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { alunosService } from '../../services/alunosService';
 import { mensalidadesService } from '../../services/mensalidadesService';
 import { maskApenasNumeros, maskCPF, maskData, maskTelefone } from '../../utils/masks';
+import { formatarMesAno } from '../../utils/formatters';
 
 const getIniciais = (nomeCompleto) => {
   if (!nomeCompleto) return '??';
@@ -27,12 +28,6 @@ const getIniciais = (nomeCompleto) => {
 
 const VERDE = '#16a34a';
 const VERMELHO = '#dc2626';
-
-const formatarMesAno = (ano, mes) => {
-  const data = new Date(Number(ano), Number(mes) - 1, 1);
-  const texto = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(data);
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
-};
 
 const toNumeroSeguro = (valor) => {
   const numero = Number(valor);
@@ -194,7 +189,7 @@ export default function FichaAluno({ navigation, route }) {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.azul} />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.loadingText}>Carregando dados...</Text>
         </View>
       ) : error ? (
@@ -316,7 +311,7 @@ export default function FichaAluno({ navigation, route }) {
                     </View>
                     {salvandoMensalidadeId === pag.id ? (
                       <View style={styles.loadingSwitchContainer}>
-                        <ActivityIndicator size="small" color={colors.azul} />
+                        <ActivityIndicator size="small" color={colors.primary} />
                       </View>
                     ) : (
                       <Switch
@@ -373,7 +368,7 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.azul
+    color: colors.primary
   },
   
   errorContainer: {
@@ -390,7 +385,7 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   btnRetry: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8
@@ -400,18 +395,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff'
   },
-  
-  header: { 
-    paddingHorizontal: 20, 
-    paddingTop: 60, 
-    paddingBottom: 20, 
-    backgroundColor: '#ffffff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10
-  },
-  backBtn: { marginLeft: -10 },
-  titulo: { fontSize: 28, fontWeight: '800', color: colors.azul, letterSpacing: -0.5 },
   
   perfilCard: { 
     alignItems: 'center', 
@@ -425,9 +408,9 @@ const styles = StyleSheet.create({
     width: 70, height: 70, borderRadius: 25, backgroundColor: '#f1f5f9',
     alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#e2e8f0', marginBottom: 15
   },
-  avatarIniciaisTexto: { fontSize: 32, fontWeight: '800', color: colors.azul },
-  nomeAluno: { fontSize: 22, fontWeight: '800', color: colors.azul, textAlign: 'center' },
-  badgeCategoria: { backgroundColor: colors.azul, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4, marginTop: 10 },
+  avatarIniciaisTexto: { fontSize: 32, fontWeight: '800', color: colors.primary },
+  nomeAluno: { fontSize: 22, fontWeight: '800', color: colors.primary, textAlign: 'center' },
+  badgeCategoria: { backgroundColor: colors.primary, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4, marginTop: 10 },
   badgeCategoriaTexto: { fontSize: 10, fontWeight: '900', color: '#ffffff' },
 
   card: {
@@ -440,7 +423,7 @@ const styles = StyleSheet.create({
   infoBox: { flex: 1 },
   infoBoxFull: { width: '100%', marginTop: 15 },
   infoLabel: { fontSize: 9, fontWeight: '800', color: '#94a3b8', marginBottom: 4 },
-  infoTexto: { fontSize: 15, fontWeight: '700', color: colors.azul },
+  infoTexto: { fontSize: 15, fontWeight: '700', color: colors.primaryDark },
 
   secaoHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   statsBadgeRow: { flexDirection: 'row', gap: 10 },
@@ -459,7 +442,7 @@ const styles = StyleSheet.create({
 
   pagamentoLinha: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
   borderTop: { borderTopWidth: 1, borderTopColor: '#f1f5f9' },
-  pagamentoMes: { fontSize: 15, fontWeight: '800', color: colors.azul, marginBottom: 4 },
+  pagamentoMes: { fontSize: 15, fontWeight: '800', color: colors.primary, marginBottom: 4 },
   pagamentoValor: { fontSize: 12, fontWeight: '700', color: '#64748b', marginBottom: 6 },
   pixInfo: { fontSize: 11, fontWeight: '700', color: '#0f766e', marginTop: 6 },
   loadingSwitchContainer: { width: 50, alignItems: 'center', justifyContent: 'center' },
@@ -471,11 +454,11 @@ const styles = StyleSheet.create({
   statusTextoVermelho: { color: VERMELHO },
   
   btnVerMais: { marginTop: 15, alignItems: 'center' },
-  btnVerMaisTexto: { fontSize: 12, fontWeight: '800', color: colors.azul },
+  btnVerMaisTexto: { fontSize: 12, fontWeight: '800', color: colors.primary },
 
   footerAcoes: { flexDirection: 'row', marginHorizontal: 20, marginTop: 10, gap: 12 },
   btnEditar: { 
-    flex: 1, backgroundColor: colors.azul, padding: 18, borderRadius: 16, 
+    flex: 1, backgroundColor: colors.primary, padding: 18, borderRadius: 16, 
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 
   },
   btnEditarTexto: { fontSize: 15, fontWeight: '800', color: '#ffffff' },

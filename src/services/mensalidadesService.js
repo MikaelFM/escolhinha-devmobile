@@ -2,6 +2,15 @@ import api from './api';
 
 export const mensalidadesService = {
   /**
+   * Listar mensalidades por mês e ano
+   */
+  getMensalidades: async ({ mes, ano } = {}) => {
+    return api.get('/get_mensalidades', {
+      params: { mes, ano },
+    });
+  },
+
+  /**
    * Listar mensalidades do aluno por RG
    */
   getMensalidadesAluno: async (rgAluno) => {

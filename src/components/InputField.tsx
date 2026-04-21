@@ -10,6 +10,7 @@ import {
   TextInputProps,
 } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../global/colors';
 
 type Variante = 'texto' | 'senha' | 'select';
@@ -51,6 +52,7 @@ export default function InputField({
 }: CampoInputProps) {
   const [focado, setFocado] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
+  const [senhaVisivel, setSenhaVisivel] = useState(false);
 
   const temErro = !!erro;
 
@@ -76,6 +78,13 @@ export default function InputField({
     disabled && styles.inputDisabled,
   ];
 
+  const estiloSelect = [
+    styles.selectContainer,
+    focado && styles.selectFocado,
+    temErro && styles.selectErro,
+    disabled && styles.selectDisabled,
+  ];
+
   return (
     <View style={[styles.wrapper, style]}>
       <Text style={styles.label}>
@@ -86,14 +95,17 @@ export default function InputField({
       {variante === 'select' ? (
         <>
           <TouchableOpacity
-            style={[estiloInput, styles.select]}
+            style={[estiloSelect, styles.selectButtonContent]}
             onPress={() => {
               if (!disabled) setModalAberto(true);
             }}
             activeOpacity={0.8}
             disabled={disabled}
           >
-            <Text style={value ? styles.selectTexto : styles.selectPlaceholder}>
+            <Text
+              style={[value ? styles.selectTexto : styles.selectPlaceholder]}
+              numberOfLines={1}
+            >
               {value || placeholder}
             </Text>
             <Text style={styles.selectIcone}>▾</Text>
@@ -142,19 +154,33 @@ export default function InputField({
           </Modal>
         </>
       ) : (
-        <TextInput
-          style={estiloInput}
-          placeholder={placeholder}
-          placeholderTextColor={colors.placeholder}
-          value={value}
-          onChangeText={handleChangeText}
-          onFocus={() => setFocado(true)}
-          onBlur={handleBlur}
-          secureTextEntry={variante === 'senha'}
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize}
-          editable={!disabled}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={estiloInput}
+            placeholder={placeholder}
+            placeholderTextColor={colors.textPlaceholder}
+            value={value}
+            onChangeText={handleChangeText}
+            onFocus={() => setFocado(true)}
+            onBlur={handleBlur}
+            secureTextEntry={variante === 'senha' && !senhaVisivel}
+            keyboardType={keyboardType}
+            autoCapitalize={autoCapitalize}
+            editable={!disabled}
+          />
+          {variante === 'senha' && (
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setSenhaVisivel(!senhaVisivel)}
+            >
+              <Ionicons
+                name={senhaVisivel ? 'eye' : 'eye-off'}
+                size={20}
+                color={colors.primary}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
       )}
 
       <View style={styles.erroContainer}>
@@ -172,36 +198,43 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.textoSecundario,
+    color: colors.textSecondary,
     marginBottom: 6,
     letterSpacing: 0.2,
   },
   asterisco: {
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '700',
   },
+  inputWrapper: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   input: {
+    flex: 1,
     backgroundColor: '#ffffff',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 15,
-    color: colors.textoPrincipal,
-    borderWidth: 1, 
-    borderColor: '#e2e8f0'
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    paddingRight: 48,
   },
   inputFocado: {
-    borderColor: colors.azul,
+    borderColor: colors.primary,
     backgroundColor: '#ffffff',
-    shadowColor: colors.azul,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 0,
   },
   inputErro: {
-    borderColor: colors.vermelhoBorda,
-    backgroundColor: colors.vermelhoClaro,
+    borderColor: colors.errorBorder,
+    backgroundColor: colors.errorLight,
   },
   inputDisabled: {
     backgroundColor: '#f8fafc',
@@ -214,27 +247,63 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   erroTexto: {
-    color: colors.vermelho,
+    color: colors.error,
     fontSize: 12,
     fontWeight: '500',
   },
-  select: {
+  selectContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  selectFocado: {
+    borderColor: colors.primary,
+    backgroundColor: '#ffffff',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  selectErro: {
+    borderColor: colors.errorBorder,
+    backgroundColor: colors.errorLight,
+  },
+  selectDisabled: {
+    backgroundColor: '#f8fafc',
+    opacity: 0.75,
+  },
+  selectButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   selectTexto: {
+    flex: 1,
     fontSize: 15,
-    color: colors.textoPrincipal,
+    color: colors.text,
+    flexShrink: 1,
   },
   selectPlaceholder: {
+    flex: 1,
     fontSize: 15,
-    color: colors.placeholder,
+    color: colors.textPlaceholder,
+    flexShrink: 1,
   },
   selectIcone: {
     fontSize: 16,
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '700',
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 12,
+    padding: 8,
+    zIndex: 10,
+    elevation: 4,
   },
   modalOverlay: {
     flex: 1,
@@ -261,7 +330,7 @@ const styles = StyleSheet.create({
   modalTitulo: {
     fontSize: 16,
     fontWeight: '700',
-    color: colors.textoPrincipal,
+    color: colors.text,
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -274,7 +343,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   modalItemAtivo: {
-    backgroundColor: colors.azulMedio,
+    backgroundColor: colors.primaryBorder,
   },
   modalItemTexto: {
     fontSize: 15,
@@ -282,12 +351,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   modalItemTextoAtivo: {
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '700',
   },
   modalCheck: {
     fontSize: 16,
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '700',
   },
   separador: {

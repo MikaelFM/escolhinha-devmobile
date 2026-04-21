@@ -32,18 +32,24 @@ export default function ConfiguracoesProfessor({ navigation }) {
     .map((parte) => parte[0]?.toUpperCase() || '')
     .join('') || 'AD';
 
-  const OptionItem = ({ icone, titulo, subtitulo, onPress, valor, isSwitch, isDestak }) => (
+  const OptionItem = ({ icone, titulo, subtitulo, onPress, valor, isSwitch, isDestak, isDanger }) => (
     <TouchableOpacity 
       style={styles.cardOpcao} 
       onPress={onPress} 
       disabled={isSwitch}
       activeOpacity={0.7}
     >
-      <View style={[styles.iconWrapper, isDestak && { backgroundColor: '#eff6ff' }]}>
-        <Ionicons name={icone} size={22} color={isDestak ? colors.azul : '#64748b'} />
+      <View
+        style={[
+          styles.iconWrapper,
+          isDestak && { backgroundColor: '#eff6ff' },
+          isDanger && { backgroundColor: '#fef2f2' },
+        ]}
+      >
+        <Ionicons name={icone} size={22} color={isDanger ? colors.error : colors.primary} />
       </View>
       <View style={{ flex: 1, marginLeft: 15 }}>
-        <Text style={styles.opcaoTitulo}>{titulo}</Text>
+        <Text style={[styles.opcaoTitulo, isDanger && styles.opcaoTituloDanger]}>{titulo}</Text>
         {subtitulo && <Text style={styles.opcaoSubtitulo}>{subtitulo}</Text>}
       </View>
       {isSwitch ? (
@@ -104,7 +110,7 @@ export default function ConfiguracoesProfessor({ navigation }) {
             titulo="Ajustes de Cobrança" 
             subtitulo="Valor, vencimento e total de aulas"
             isDestak
-            onPress={() => navigation.navigate('EditarCobranca')}
+            onPress={() => navigation.navigate('configuracoes')}
           />
         </View>
 
@@ -125,13 +131,14 @@ export default function ConfiguracoesProfessor({ navigation }) {
             subtitulo="Alterar senha de acesso ao painel"
             onPress={() => navigation.navigate('alteracaoSenha')}
           />
+          <OptionItem 
+            icone="log-out-outline" 
+            titulo="Encerrar Sessão" 
+            subtitulo="Sair da conta administrativa"
+            isDanger
+            onPress={handleLogout}
+          />
         </View>
-
-        {/* BOTÃO SAIR */}
-        <TouchableOpacity style={styles.btnSair} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-          <Text style={styles.btnSairTexto}>Encerrar Sessão</Text>
-        </TouchableOpacity>
 
         <Text style={styles.versao}>Versão Admin 1.0.4 • 2026</Text>
 
@@ -141,17 +148,17 @@ export default function ConfiguracoesProfessor({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
+  container: { flex: 1, backgroundColor: colors.background },
   header: { paddingHorizontal: 20, paddingTop: 100, marginBottom: 20 },
-  titulo: { fontSize: 32, fontWeight: '800', color: colors.azul, letterSpacing: -0.5 },
-  subtitulo: { fontSize: 14, color: '#94a3b8', marginTop: 4 },
+  titulo: { fontSize: 32, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 },
+  subtitulo: { fontSize: 14, color: colors.textPlaceholder, marginTop: 4 },
 
   perfilCard: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 20,
     padding: 20,
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#e2e8f0',
@@ -159,12 +166,12 @@ const styles = StyleSheet.create({
   },
   avatar: {
     width: 65, height: 65, borderRadius: 20,
-    backgroundColor: colors.azul, alignItems: 'center', justifyContent: 'center'
+    backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center'
   },
   avatarTexto: { color: '#fff', fontSize: 22, fontWeight: '800' },
   perfilInfo: { marginLeft: 15, flex: 1 },
-  nomeUsuario: { fontSize: 17, fontWeight: '800', color: colors.azul },
-  emailUsuario: { fontSize: 13, color: '#64748b', marginTop: 2 },
+  nomeUsuario: { fontSize: 17, fontWeight: '800', color: colors.primary },
+  emailUsuario: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
   badgeCargo: { 
     backgroundColor: '#e2e8f0', alignSelf: 'flex-start', 
     paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, marginTop: 8 
@@ -172,7 +179,7 @@ const styles = StyleSheet.create({
   cargoTexto: { fontSize: 9, fontWeight: '900', color: '#475569' },
 
   secaoTitulo: { 
-    fontSize: 11, fontWeight: '900', color: '#94a3b8', 
+    fontSize: 11, fontWeight: '900', color: colors.textPlaceholder, 
     marginLeft: 20, marginTop: 20, marginBottom: 10, letterSpacing: 1 
   },
   grupoCards: { marginHorizontal: 20, backgroundColor: '#fff' },
@@ -184,15 +191,9 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 12,
     backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center'
   },
-  opcaoTitulo: { fontSize: 15, fontWeight: '700', color: colors.azul },
-  opcaoSubtitulo: { fontSize: 12, color: '#94a3b8', marginTop: 2 },
+  opcaoTitulo: { fontSize: 15, fontWeight: '700', color: colors.primaryDark },
+  opcaoTituloDanger: { color: '#dc2626' },
+  opcaoSubtitulo: { fontSize: 12, color: colors.textPlaceholder, marginTop: 2 },
 
-  btnSair: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    marginTop: 30, marginHorizontal: 20, padding: 16,
-    borderRadius: 15, backgroundColor: '#fff1f2',
-    borderWidth: 1, borderColor: '#fecdd3', gap: 10
-  },
-  btnSairTexto: { fontSize: 16, fontWeight: '800', color: '#dc2626' },
   versao: { textAlign: 'center', color: '#cbd5e1', fontSize: 11, marginTop: 20, marginBottom: 20 }
 });

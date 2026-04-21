@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 45,
     fontWeight: '700',
-    color: colors.azul,
+    color: colors.primary,
     marginBottom: 40,
     letterSpacing: 0.3,
   },
@@ -158,10 +158,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 6,
     borderLeftWidth: 3,
-    borderLeftColor: colors.vermelho,
+    borderLeftColor: colors.error,
   },
   erroTexto: {
-    color: colors.vermelho,
+    color: colors.error,
     fontSize: 13,
     fontWeight: '500',
   },
@@ -171,12 +171,12 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   esqueceuTexto: {
-    color: colors.azul,
+    color: colors.primary,
     fontSize: 13,
     fontWeight: '500',
   },
   botaoEntrar: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 17,
     alignItems: 'center',

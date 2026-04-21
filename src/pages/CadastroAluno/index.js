@@ -7,6 +7,8 @@ import {
   Text,
   TouchableOpacity,
   View,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 
 import { maskApenasNumeros, maskCPF, maskData, maskTelefone } from '../../utils/masks';
@@ -16,6 +18,7 @@ import { colors } from '../../global/colors';
 import { alunosService } from '../../services';
 import { categoriasService } from '../../services/categoriasService';
 import { responsavelService } from '../../services/responsavelService';
+import { normalizarTexto } from '../../utils/formatters';
 
 const FORM_INICIAL = {
   nome: '',
@@ -28,8 +31,6 @@ const FORM_INICIAL = {
   categoria: '',
   data_nascimento: '',
 };
-
-const normalizarTexto = (valor) => (valor ? String(valor) : '');
 
 export default function CadastroAluno({ navigation, route }) {
   const idDaRota = route?.params?.id ?? route?.params?.rg ?? null;
@@ -188,22 +189,21 @@ export default function CadastroAluno({ navigation, route }) {
     <SafeAreaView style={styles.container}>
       {carregandoAluno && modoEdicao ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.azul} />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.loadingText}>Carregando dados...</Text>
         </View>
       ) : (
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, paddingTop: 0 }}
+          keyboardVerticalOffset={120}
         >
+          <ScrollView
+            contentContainerStyle={styles.scroll}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
           <View>
-            <View style={styles.header}>
-              <Text style={styles.titulo}>{modoEdicao ? 'Editar Aluno' : 'Cadastrar Aluno'}</Text>
-              <Text style={styles.subtitulo}>
-                {modoEdicao ? 'Atualize os dados do aluno selecionado' : 'Preencha os dados do novo aluno'}
-              </Text>
-            </View>
             <InputField
               label="Nome completo"
               obrigatorio
@@ -223,6 +223,7 @@ export default function CadastroAluno({ navigation, route }) {
               erro={erros.rg}
               mascara={maskApenasNumeros}
               keyboardType="numeric"
+              disabled={modoEdicao}
             />
 
             <InputField
@@ -309,6 +310,7 @@ export default function CadastroAluno({ navigation, route }) {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        </KeyboardAvoidingView>
       )}
     </SafeAreaView>
   );
@@ -338,18 +340,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 10,
-    backgroundColor: colors.azulPalido,
+    backgroundColor: colors.primaryLight,
     borderWidth: 1.5,
-    borderColor: colors.azulMedio,
-  },
-  navIconeVoltar: {
-    fontSize: 16,
-    color: colors.azul,
-    fontWeight: '700',
+    borderColor: colors.primaryBorder,
   },
   navTextoVoltar: {
     fontSize: 14,
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '600',
   },
   header: {
@@ -360,11 +357,11 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
-    shadowColor: colors.azul,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -376,13 +373,13 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 26,
     fontWeight: '700',
-    color: colors.azul,
+    color: colors.primary,
     letterSpacing: 0.3,
     marginBottom: 4,
   },
   subtitulo: {
     fontSize: 14,
-    color: '#64748b',
+    color: colors.textSecondary,
     fontWeight: '400',
   },
   loadingContainer: {
@@ -393,7 +390,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '600',
   },
   sucessoBox: {
@@ -412,7 +409,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   botaoSalvar: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -441,7 +438,7 @@ const styles = StyleSheet.create({
   modalTitulo: {
     fontSize: 16,
     fontWeight: '700',
-    color: colors.textoPrincipal,
+    color: colors.text,
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -454,7 +451,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   modalItemAtivo: {
-    backgroundColor: colors.azulMedio,
+    backgroundColor: colors.primaryBorder,
   },
   modalItemTexto: {
     fontSize: 15,
@@ -462,12 +459,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   modalItemTextoAtivo: {
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '700',
   },
   modalCheck: {
     fontSize: 16,
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '700',
   },
   separador: {

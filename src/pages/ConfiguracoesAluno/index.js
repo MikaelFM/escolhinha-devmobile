@@ -32,7 +32,7 @@ export default function ConfiguracoesAluno({ navigation }) {
     .map((parte) => parte[0]?.toUpperCase() || '')
     .join('') || 'AL';
 
-  const OptionItem = ({ icone, titulo, subtitulo, onPress, valor, isSwitch }) => (
+  const OptionItem = ({ icone, titulo, subtitulo, onPress, valor, isSwitch, isDanger }) => (
     <TouchableOpacity 
       style={styles.cardOpcao} 
       onPress={onPress} 
@@ -40,10 +40,10 @@ export default function ConfiguracoesAluno({ navigation }) {
       activeOpacity={0.7}
     >
       <View style={styles.iconWrapper}>
-        <Ionicons name={icone} size={22} color={colors.azul} />
+        <Ionicons name={icone} size={22} color={isDanger ? colors.error : colors.primary} />
       </View>
       <View style={{ flex: 1, marginLeft: 15 }}>
-        <Text style={styles.opcaoTitulo}>{titulo}</Text>
+        <Text style={[styles.opcaoTitulo, isDanger && styles.opcaoTituloDanger]}>{titulo}</Text>
         {subtitulo && <Text style={styles.opcaoSubtitulo}>{subtitulo}</Text>}
       </View>
       {isSwitch ? (
@@ -75,44 +75,48 @@ export default function ConfiguracoesAluno({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        
-        {/* HEADER PADRONIZADO */}
-        <View style={styles.header}>
+        <View style={styles.topHeader}>
           <Text style={styles.titulo}>Ajustes</Text>
           <Text style={styles.subtitulo}>Gerencie sua conta e preferências</Text>
         </View>
 
-        {/* CARD DE PERFIL EXPONENCIAL */}
-        <View style={styles.perfilCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarTexto}>{iniciais}</Text>
-          </View>
-          <View style={styles.perfilInfo}>
-            <Text style={styles.nomeUsuario}>{usuario.nome}</Text>
-            <Text style={styles.emailUsuario}>{usuario.telefone}</Text>
-            <View style={styles.badgeMatricula}>
-                <Text style={styles.matriculaTexto}>RG: {usuario.rg}</Text>
+        <View style={styles.bottomSheet}>
+          <View style={styles.perfilCard}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarTexto}>{iniciais}</Text>
+            </View>
+            <View style={styles.perfilInfo}>
+              <Text style={styles.nomeUsuario}>{usuario.nome}</Text>
+              <Text style={styles.emailUsuario}>{usuario.telefone}</Text>
+              <View style={styles.badgeMatricula}>
+                  <Text style={styles.matriculaTexto}>RG: {usuario.rg}</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* SEÇÃO: SEGURANÇA (RF015) */}
-        <Text style={styles.secaoTitulo}>SEGURANÇA E ACESSO</Text>
-        <View style={styles.grupoCards}>
-          <OptionItem 
-            icone="finger-print-outline" 
-            titulo="Acesso por Biometria" 
-            subtitulo="Usar FaceID ou Digital para entrar"
-            isSwitch
-            valor={biometriaAtiva}
-            onPress={() => setBiometriaAtiva(!biometriaAtiva)}
-          />
-          <OptionItem 
-            icone="lock-closed-outline" 
-            titulo="Alterar Senha" 
-            onPress={() => navigation.navigate('alteracaoSenha')}
-          />
-        </View>
+          <Text style={styles.secaoTitulo}>SEGURANÇA E ACESSO</Text>
+          <View style={styles.grupoCards}>
+            <OptionItem 
+              icone="finger-print-outline" 
+              titulo="Acesso por Biometria" 
+              subtitulo="Usar FaceID ou Digital para entrar"
+              isSwitch
+              valor={biometriaAtiva}
+              onPress={() => setBiometriaAtiva(!biometriaAtiva)}
+            />
+            <OptionItem 
+              icone="lock-closed-outline" 
+              titulo="Alterar Senha" 
+              onPress={() => navigation.navigate('alteracaoSenha')}
+            />
+            <OptionItem 
+              icone="log-out-outline" 
+              titulo="Sair da Conta" 
+              subtitulo="Encerrar sua sessao neste dispositivo"
+              isDanger
+              onPress={handleLogout}
+            />
+          </View>
 
         {/* SEÇÃO: PREFERÊNCIAS */}
         {/* <Text style={styles.secaoTitulo}>PREFERÊNCIAS</Text>
@@ -148,13 +152,8 @@ export default function ConfiguracoesAluno({ navigation }) {
           />
         </View> */}
 
-        {/* BOTÃO SAIR */}
-        <TouchableOpacity style={styles.btnSair} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-          <Text style={styles.btnSairTexto}>Sair da Conta</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.versao}>Versão 1.0.4 (Beta)</Text>
+          <Text style={styles.versao}>Versão 1.0.4 (Beta)</Text>
+        </View>
 
       </ScrollView>
     </SafeAreaView>
@@ -162,17 +161,29 @@ export default function ConfiguracoesAluno({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
-  header: { paddingHorizontal: 20, paddingTop: 80, marginBottom: 20 },
-  titulo: { fontSize: 32, fontWeight: '800', color: colors.azul, letterSpacing: -0.5 },
-  subtitulo: { fontSize: 14, color: '#94a3b8', marginTop: 4 },
+  container: { flex: 1, backgroundColor: colors.background },
+  topHeader: { paddingHorizontal: 20, paddingTop: 80, marginBottom: 14 },
+  titulo: { fontSize: 32, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 },
+  subtitulo: { fontSize: 14, color: colors.textPlaceholder, marginTop: 4 },
+  bottomSheet: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 14,
+    paddingBottom: 18,
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -8 },
+    elevation: 20,
+  },
 
   perfilCard: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 20,
     padding: 20,
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#e2e8f0',
@@ -182,14 +193,14 @@ const styles = StyleSheet.create({
     width: 65,
     height: 65,
     borderRadius: 32.5,
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center'
   },
   avatarTexto: { color: '#fff', fontSize: 22, fontWeight: '800' },
   perfilInfo: { marginLeft: 15, flex: 1 },
-  nomeUsuario: { fontSize: 17, fontWeight: '800', color: colors.azul },
-  emailUsuario: { fontSize: 13, color: '#64748b', marginTop: 2 },
+  nomeUsuario: { fontSize: 17, fontWeight: '800', color: colors.primaryDark },
+  emailUsuario: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
   badgeMatricula: { 
     backgroundColor: '#e2e8f0', 
     alignSelf: 'flex-start', 
@@ -203,44 +214,37 @@ const styles = StyleSheet.create({
   secaoTitulo: { 
     fontSize: 11, 
     fontWeight: '900', 
-    color: '#94a3b8', 
+    color: colors.textPlaceholder, 
     marginLeft: 20, 
     marginTop: 20, 
     marginBottom: 10, 
     letterSpacing: 1 
   },
-  grupoCards: { marginHorizontal: 20, backgroundColor: '#fff' },
+  grupoCards: { marginHorizontal: 20, backgroundColor: 'transparent' },
   cardOpcao: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: colors.backgroundSecondary,
+    borderRadius: 16,
+    paddingHorizontal: 14,
     paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9'
+    marginBottom: 10,
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1
   },
   iconWrapper: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center'
   },
-  opcaoTitulo: { fontSize: 15, fontWeight: '700', color: colors.azul },
-  opcaoSubtitulo: { fontSize: 12, color: '#94a3b8', marginTop: 2 },
-
-  btnSair: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 40,
-    marginHorizontal: 20,
-    padding: 16,
-    borderRadius: 15,
-    backgroundColor: '#fff1f2',
-    borderWidth: 1,
-    borderColor: '#fecdd3',
-    gap: 10
-  },
-  btnSairTexto: { fontSize: 16, fontWeight: '800', color: '#dc2626' },
-  versao: { textAlign: 'center', color: '#cbd5e1', fontSize: 12, marginTop: 20 }
+  opcaoTitulo: { fontSize: 15, fontWeight: '700', color: colors.primaryDark },
+  opcaoTituloDanger: { color: '#dc2626' },
+  opcaoSubtitulo: { fontSize: 12, color: colors.textPlaceholder, marginTop: 2 },
+  versao: { textAlign: 'center', color: '#cbd5e1', fontSize: 12, marginTop: 16 }
 });

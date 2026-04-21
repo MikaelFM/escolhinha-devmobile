@@ -142,7 +142,7 @@ export default function ConfiguracoesSistema() {
   if (loading) {
     return (
       <SafeAreaView style={styles.containerLoading}>
-        <ActivityIndicator size="large" color={colors.azul} />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Carregando ajustes...</Text>
       </SafeAreaView>
     );
@@ -218,21 +218,21 @@ export default function ConfiguracoesSistema() {
 }
 
 const styles = StyleSheet.create({
-  containerLoading: { flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 12, fontSize: 14, color: '#64748b', fontWeight: '600' },
-  container: { flex: 1, backgroundColor: '#ffffff', paddingTop: 80 },
+  containerLoading: { flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' },
+  loadingText: { marginTop: 12, fontSize: 14, color: colors.textSecondary, fontWeight: '600' },
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: 25 },
   header: { marginBottom: 30, paddingBottom: 30 },
-  titulo: { fontSize: 26, fontWeight: '700', color: colors.azul },
-  subtitulo: { fontSize: 14, color: '#64748b', marginTop: 4 },
+  titulo: { fontSize: 26, fontWeight: '700', color: colors.primary },
+  subtitulo: { fontSize: 14, color: colors.textSecondary, marginTop: 4 },
   
   cardRegras: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.backgroundSecondary,
     padding: 20,
     borderRadius: 16,
     marginBottom: 30,
   },
-  cardRegrasTitulo: { fontSize: 14, fontWeight: '700', color: colors.azul, marginBottom: 5 },
+  cardRegrasTitulo: { fontSize: 14, fontWeight: '700', color: colors.primary, marginBottom: 5 },
   cardRegrasTexto: { fontSize: 14, color: '#475569', lineHeight: 20 },
   negrito: { fontWeight: '700', color: '#1e293b' },
 
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   labelSwitch: { fontSize: 15, fontWeight: '600', color: '#1e293b' },
-  sublabelSwitch: { fontSize: 12, color: '#94a3b8', marginTop: 2 },
+  sublabelSwitch: { fontSize: 12, color: colors.textPlaceholder, marginTop: 2 },
 
   sucessoBox: {
     backgroundColor: '#f0fdf4',
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   sucessoTexto: { color: '#16a34a', fontWeight: '600' },
 
   botaoSalvar: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

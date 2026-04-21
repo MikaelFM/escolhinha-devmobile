@@ -6,32 +6,29 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
+  StatusBar
 } from 'react-native';
-import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-
+import { colors } from '../../global/colors';
 
 const { width } = Dimensions.get('window');
-const VERDE = '#16a34a';
-const VERMELHO = '#dc2626';
-const AZUL_CLARO = '#e0f2fe';
 
 export default function Dashboard() {
   const navigation = useNavigation();
+  
   const stats = {
     totalAlunos: 42,
-    alunosAtivos: 38,
     frequenciaGeral: '82%',
     pendenciasFinanceiras: 5,
     receitaMes: 'R$ 5.700,00'
   };
 
-  const ResumoCard = ({ titulo, valor, icone, corIcone, bgIcone }) => (
+  const ResumoCard = ({ titulo, valor, icone }) => (
     <View style={styles.cardResumo}>
-      <View style={[styles.iconContainer, { backgroundColor: bgIcone }]}>
-        <Ionicons name={icone} size={22} color={corIcone} />
+      <View style={styles.iconContainer}>
+        <Ionicons name={icone} size={22} color={colors.primary} />
       </View>
       <View>
         <Text style={styles.cardLabel}>{titulo}</Text>
@@ -40,99 +37,56 @@ export default function Dashboard() {
     </View>
   );
 
+  const AtalhoItem = ({ icone, titulo, rota, ultimo = false }) => (
+    <TouchableOpacity
+      style={[styles.btnAcao, ultimo && styles.btnAcaoUltimo]}
+      onPress={() => navigation.navigate(rota)}
+      activeOpacity={0.75}
+    >
+      <View style={styles.iconWrapperAtalho}>
+        <Ionicons name={icone} size={20} color={colors.primary} />
+      </View>
+      <View style={styles.btnAcaoConteudo}>
+        <Text style={styles.btnAcaoTexto}>{titulo}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={colors.primaryAccent} />
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header do Dashboard */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.saudacao}>Olá, Treinador</Text>
-          <Text style={styles.subSaudacao}>Painel de Controle Escolinha</Text>
-        </View>
-        <TouchableOpacity style={styles.btnNotificacao}>
-          <Ionicons name="notifications-outline" size={24} color={colors.azul} />
-          {stats.pendenciasFinanceiras > 0 && <View style={styles.badgeNotificacao} />}
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
+      <StatusBar barStyle="dark-content" />
+      
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 60, paddingBottom: 30, flexGrow: 1 }}>
         
-        {/* Grid de Stats Principais */}
+        <View style={styles.topHeader}>
+          <Text style={styles.saudacao}>Olá, Treinador</Text>
+          <Text style={styles.subSaudacao}>Confira o que está acontecendo hoje.</Text>
+        </View>
+
         <View style={styles.gridStats}>
           <ResumoCard 
             titulo="Total Alunos" 
             valor={stats.totalAlunos} 
             icone="people" 
-            corIcone={colors.azul} 
-            bgIcone={AZUL_CLARO} 
           />
           <ResumoCard 
-            titulo="Frequência" 
+            titulo="Freq. Média" 
             valor={stats.frequenciaGeral} 
-            icone="calendar-check" 
-            corIcone={VERDE} 
-            bgIcone="#f0fdf4" 
+            icone="calendar" 
           />
         </View>
 
-        {/* Card Financeiro de Destaque */}
-        <View style={styles.cardFinanceiro}>
-          <View>
-            <Text style={styles.finLabel}>Receita Prevista (Março)</Text>
-            <Text style={styles.finValor}>{stats.receitaMes}</Text>
+        <View style={styles.bottomSheet}>
+
+          <Text style={styles.secaoTitulo}>AÇÕES RÁPIDAS</Text>
+          <View style={styles.gridAcoes}>
+            <AtalhoItem icone="checkbox" titulo="Lançar Chamada" rota="registroPresenca" />
+            <AtalhoItem icone="person-add" titulo="Cadastrar Aluno" rota="cadastroAluno" />
+            <AtalhoItem icone="cash" titulo="Histórico de Mensalidades" rota="historicoMensalidades" />
+            <AtalhoItem icone="settings" titulo="Configurações" rota="profile" ultimo />
           </View>
-          <View style={styles.finAlerta}>
-            <Text style={styles.finAlertaTitulo}>{stats.pendenciasFinanceiras}</Text>
-            <Text style={styles.finAlertaSub}>Pendentes</Text>
-          </View>
         </View>
-
-        {/* Seção de Ações Rápidas */}
-        <Text style={styles.secaoTitulo}>AÇÕES RÁPIDAS</Text>
-        <View style={styles.gridAcoes}>
-          <TouchableOpacity 
-            style={styles.btnAcao}
-            onPress={() => navigation.navigate('registroPresenca')}
-          >
-            <Ionicons name="checkbox-outline" size={32} color={colors.azul} />
-            <Text style={styles.btnAcaoTexto}>Chamada</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.btnAcao}
-            onPress={() => navigation.navigate('cadastroAluno')}
-          >
-            <Ionicons name="person-add-outline" size={32} color={colors.azul} />
-            <Text style={styles.btnAcaoTexto}>Alunos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.btnAcao}
-            onPress={() => navigation.navigate('historicoMensalidades')}
-          >
-            <Ionicons name="cash-outline" size={32} color={colors.azul} />
-            <Text style={styles.btnAcaoTexto}>Mensalidades</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Alunos com Faltas Excessivas (Alerta) */}
-        {/* <View style={styles.secaoHeader}>
-          <Text style={styles.secaoTitulo}>ALERTAS DE EVASÃO</Text>
-          <TouchableOpacity><Text style={styles.verMais}>Ver todos</Text></TouchableOpacity>
-        </View>
-        
-        <View style={styles.listaAlerta}>
-          {['Marcos Oliveira', 'Felipe Santos'].map((nome, index) => (
-            <View key={index} style={styles.itemAlerta}>
-              <View style={styles.alertaInfo}>
-                <View style={styles.alertaAvatar} />
-                <Text style={styles.alertaNome}>{nome}</Text>
-              </View>
-              <View style={styles.alertaBadge}>
-                <Text style={styles.alertaBadgeTexto}>3 faltas seguidas</Text>
-              </View>
-            </View>
-          ))}
-        </View> */}
 
       </ScrollView>
     </SafeAreaView>
@@ -142,87 +96,109 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: '#ffffff' ,
-    backgroundColor: '#f8fafc'
+    backgroundColor: colors.background
   },
-  header: {
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 80,
-    backgroundColor: '#ffffff',
+  topHeader: {
+    marginTop: 70,
+    paddingHorizontal: 20,
+    marginBottom: 30
   },
-  saudacao: { fontSize: 20, fontWeight: '800', color: colors.azul },
-  subSaudacao: { fontSize: 13, color: '#94a3b8', fontWeight: '500' },
-  btnNotificacao: {
-    width: 45, height: 45, borderRadius: 12, backgroundColor: '#f1f5f9',
-    alignItems: 'center', justifyContent: 'center'
+  welcomeContainer: {
+    marginHorizontal: 20,
+    marginBottom: 14,
+    backgroundColor: colors.primaryMedium,
+    borderRadius: 20,
+    paddingVertical: 22,
+    paddingHorizontal: 18,
+    shadowColor: 'black',
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 40 },
+    elevation: 8,
   },
-  badgeNotificacao: {
-    position: 'absolute', top: 12, right: 14, width: 8, height: 8,
-    borderRadius: 4, backgroundColor: VERMELHO, borderWidth: 1, borderColor: '#fff'
-  },
+  saudacao: { fontSize: 26, fontWeight: '800', color: colors.primaryMedium },
+  subSaudacao: { fontSize: 15, color: colors.textSecondary, marginTop: 4 },
+  cardTitulo: { fontSize: 20, fontWeight: '800', color: colors.textInverted },
+  cardMensagem: { fontSize: 14, color: colors.primaryBorder, marginTop: 6, lineHeight: 20 },
+  
   gridStats: { 
     flexDirection: 'row', 
-    padding: 20, 
+    paddingHorizontal: 20,
+    paddingBottom: 8,
     justifyContent: 'space-between' 
   },
   cardResumo: {
     width: (width / 2) - 28,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: colors.primaryBorder,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12
+    gap: 12,
   },
   iconContainer: {
-    width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center'
-  },
-  cardLabel: { fontSize: 10, fontWeight: '700', color: '#64748b', textTransform: 'uppercase' },
-  cardValor: { fontSize: 18, fontWeight: '800', color: colors.azul },  cardFinanceiro: {
-    backgroundColor: colors.azul,
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'   
-  },
-  finLabel: { color: '#bfdbfe', fontSize: 12, fontWeight: '600' },
-  finValor: { color: '#fff', fontSize: 24, fontWeight: '800', marginTop: 4 },
-  finAlerta: { alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', padding: 10, borderRadius: 12 },
-  finAlertaTitulo: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  finAlertaSub: { color: '#fff', fontSize: 9, fontWeight: '600' },
-
-  secaoHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginTop: 25 },
-  secaoTitulo: { fontSize: 12, fontWeight: '800', color: '#94a3b8', letterSpacing: 1, marginLeft: 20, marginTop: 25 },
-  verMais: { fontSize: 12, fontWeight: '700', color: colors.azul, marginTop: 25 },
-
-  gridAcoes: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 15 },
-  btnAcao: {
-    width: (width / 3) - 22,
-    backgroundColor: '#fff',
-    paddingVertical: 20,
-    borderRadius: 16,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: colors.primaryLight,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e2e8f0'
+    justifyContent: 'center'
   },
-  btnAcaoTexto: { fontSize: 11, fontWeight: '700', color: colors.azul, marginTop: 8 },
+  cardLabel: { fontSize: 10, fontWeight: '700', color: colors.textPlaceholder, textTransform: 'uppercase' },
+  cardValor: { fontSize: 20, fontWeight: '800', color: colors.primaryDark },
+  
+  secaoTitulo: { fontSize: 12, fontWeight: '800', color: colors.textSecondary, letterSpacing: 1, marginLeft: 20, marginTop: 24 },
 
-  listaAlerta: { marginHorizontal: 20, marginTop: 15 },
-  itemAlerta: {
-    backgroundColor: '#fff', padding: 12, borderRadius: 12, marginBottom: 8,
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    borderWidth: 1, borderColor: '#f1f5f9'
+  bottomSheet: {
+    flex: 1,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: 10,
+    paddingTop: 10,
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -8 },
+    elevation: 20,
   },
-  alertaInfo: { flexDirection: 'row', alignItems: 'center' },
-  alertaAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#e2e8f0' },
-  alertaNome: { marginLeft: 10, fontSize: 14, fontWeight: '700', color: colors.azul },
-  alertaBadge: { backgroundColor: '#fef2f2', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  alertaBadgeTexto: { color: VERMELHO, fontSize: 10, fontWeight: '700' }
+  
+  gridAcoes: {
+    flexDirection: 'column',
+    marginHorizontal: 20,
+    marginTop: 15,
+    backgroundColor: 'transparent',
+  },
+  btnAcao: {
+    width: '100%',
+    paddingVertical: 15,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.backgroundSecondary,
+    borderRadius: 16,
+    marginBottom: 10,
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1
+  },
+  iconWrapperAtalho: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  btnAcaoConteudo: { flex: 1, marginLeft: 2 },
+  btnAcaoUltimo: {
+    marginBottom: 0
+  },
+  btnAcaoTexto: { fontSize: 15, fontWeight: '700', color: colors.primaryDark }
 });

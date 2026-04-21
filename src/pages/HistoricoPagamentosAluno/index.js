@@ -17,30 +17,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { mensalidadesService } from '../../services/mensalidadesService';
 import { cobrancaService } from '../../services/cobrancaService';
 import { useAuth } from '../../context/AuthContext';
+import { formatarDataBR, formatarMesAno } from '../../utils/formatters';
 
 const VERDE = '#16a34a';
 const VERMELHO = '#dc2626';
 const LARANJA = '#f59e0b';
-
-const formatarMes = (ano, mes) => {
-  if (!ano || !mes) return 'N/A';
-
-  const data = new Date(Number(ano), Number(mes) - 1, 1);
-  const texto = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(data);
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
-};
-
-const formatarDataBR = (valor) => {
-  if (!valor) return 'N/A';
-
-  const data = new Date(valor);
-  if (Number.isNaN(data.getTime())) return 'N/A';
-
-  const dia = String(data.getDate()).padStart(2, '0');
-  const mes = String(data.getMonth() + 1).padStart(2, '0');
-  const ano = data.getFullYear();
-  return `${dia}/${mes}/${ano}`;
-};
 
 export default function HistoricoMensalidadesAluno({ navigation, route }) {
   const [loading, setLoading] = useState(true);
@@ -75,7 +56,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
 
             return {
               id: String(item?.id ?? `${rgAluno}-${index}`),
-              mes: formatarMes(item?.ano, item?.mes),
+              mes: formatarMesAno(item?.ano, item?.mes),
               valor: `R$ ${String(item?.valor ?? '0.00')}`,
               status: pago ? 'Pago' : 'Pendente',
               dataPagamento: formatarDataBR(item?.data_pagamento),
@@ -177,7 +158,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name='chevron-back' size={28} color={colors.azul} />
+            <Ionicons name='chevron-back' size={28} color={colors.primary} />
           </TouchableOpacity>
           <Text style={styles.titulo}>Mensalidades</Text>
           <Text style={styles.subtitulo}>Histórico de pagamentos e cobranças</Text>
@@ -195,31 +176,33 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
           </View>
         </View>
 
-        <Text style={styles.secaoTitulo}>HISTÓRICO RECENTE</Text>
+        <View style={styles.bottomSheet}>
+          <Text style={styles.secaoTitulo}>HISTÓRICO RECENTE</Text>
 
-        <View style={styles.listaContainer}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size='large' color={colors.azul} />
-              <Text style={styles.loadingText}>Carregando mensalidades...</Text>
-            </View>
-          ) : error ? (
-            <View style={styles.errorContainer}>
-              <Ionicons name='alert-circle' size={48} color={VERMELHO} />
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : mensalidades.length > 0 ? (
-            mensalidades.map((item) => <MensalidadeItem key={item.id} item={item} />)
-          ) : (
-            <Text style={styles.vazioTexto}>Nenhum registro</Text>
-          )}
-        </View>
+          <View style={styles.listaContainer}>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size='large' color={colors.primary} />
+                <Text style={styles.loadingText}>Carregando mensalidades...</Text>
+              </View>
+            ) : error ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name='alert-circle' size={48} color={VERMELHO} />
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : mensalidades.length > 0 ? (
+              mensalidades.map((item) => <MensalidadeItem key={item.id} item={item} />)
+            ) : (
+              <Text style={styles.vazioTexto}>Nenhum registro</Text>
+            )}
+          </View>
 
-        <View style={styles.infoFooter}>
-          <Ionicons name='shield-checkmark-outline' size={16} color='#94a3b8' />
-          <Text style={styles.infoFooterTexto}>
-            Pagamentos via PIX são baixados automaticamente em até 30 minutos.
-          </Text>
+          <View style={styles.infoFooter}>
+            <Ionicons name='shield-checkmark-outline' size={16} color={colors.textPlaceholder} />
+            <Text style={styles.infoFooterTexto}>
+              Pagamentos via PIX são baixados automaticamente em até 30 minutos.
+            </Text>
+          </View>
         </View>
       </ScrollView>
 
@@ -236,7 +219,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
               style={styles.modalCloseBtn}
               onPress={() => setPixModalVisible(false)}
             >
-              <Ionicons name='close' size={24} color={colors.azul} />
+              <Ionicons name='close' size={24} color={colors.primary} />
             </TouchableOpacity>
 
             <Text style={styles.modalTitulo}>Código QR - PIX</Text>
@@ -280,11 +263,24 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
+  container: { flex: 1, backgroundColor: colors.background },
+  bottomSheet: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: 8,
+    paddingTop: 12,
+    paddingBottom: 24,
+    shadowColor: colors.textPlaceholder,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -8 },
+    elevation: 20,
+  },
   header: { paddingHorizontal: 20, paddingTop: 60, marginBottom: 20 },
   backBtn: { marginLeft: -10, marginBottom: 10 },
-  titulo: { fontSize: 32, fontWeight: '800', color: colors.azul, letterSpacing: -0.5 },
-  subtitulo: { fontSize: 14, color: '#94a3b8', marginTop: 4 },
+  titulo: { fontSize: 32, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 },
+  subtitulo: { fontSize: 14, color: colors.textPlaceholder, marginTop: 4 },
 
   resumoCard: {
     flexDirection: 'row',
@@ -297,12 +293,12 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   resumoItem: { flex: 1, alignItems: 'center' },
-  resumoLabel: { fontSize: 9, fontWeight: '900', color: '#94a3b8', letterSpacing: 1, marginBottom: 5 },
-  resumoValor: { fontSize: 16, fontWeight: '800', color: colors.azul },
+  resumoLabel: { fontSize: 9, fontWeight: '900', color: colors.textPlaceholder, letterSpacing: 1, marginBottom: 5 },
+  resumoValor: { fontSize: 16, fontWeight: '800', color: colors.primary },
   divisor: { width: 1, backgroundColor: '#e2e8f0', height: '100%' },
 
   secaoTitulo: {
-    fontSize: 11, fontWeight: '900', color: '#94a3b8',
+    fontSize: 11, fontWeight: '900', color: colors.textPlaceholder,
     marginLeft: 20, marginBottom: 15, letterSpacing: 1,
   },
 
@@ -329,12 +325,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mesTitulo: { fontSize: 16, fontWeight: '700', color: colors.azul },
-  valorSubtitulo: { fontSize: 12, color: '#64748b', marginTop: 2 },
+  mesTitulo: { fontSize: 16, fontWeight: '700', color: colors.primary },
+  valorSubtitulo: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
   pixInfo: { fontSize: 11, fontWeight: '700', color: '#0f766e', marginTop: 3 },
 
   btnPix: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -353,10 +349,10 @@ const styles = StyleSheet.create({
   badgePagoTexto: { fontSize: 10, fontWeight: '900', color: VERDE },
 
   loadingContainer: { paddingVertical: 25, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { marginTop: 10, color: '#64748b', fontSize: 13, fontWeight: '600' },
+  loadingText: { marginTop: 10, color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
   errorContainer: { paddingVertical: 25, alignItems: 'center', justifyContent: 'center' },
   errorText: { marginTop: 10, color: VERMELHO, fontSize: 13, fontWeight: '600', textAlign: 'center' },
-  vazioTexto: { color: '#94a3b8', fontSize: 13, fontWeight: '600', paddingVertical: 12 },
+  vazioTexto: { color: colors.textPlaceholder, fontSize: 13, fontWeight: '600', paddingVertical: 12 },
 
   infoFooter: {
     flexDirection: 'row',
@@ -366,7 +362,7 @@ const styles = StyleSheet.create({
     gap: 8,
     opacity: 0.7,
   },
-  infoFooterTexto: { fontSize: 11, color: '#64748b', flex: 1, lineHeight: 16 },
+  infoFooterTexto: { fontSize: 11, color: colors.textSecondary, flex: 1, lineHeight: 16 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -394,12 +390,12 @@ const styles = StyleSheet.create({
   modalTitulo: {
     fontSize: 18,
     fontWeight: '800',
-    color: colors.azul,
+    color: colors.primary,
     marginBottom: 20,
     marginTop: 10,
   },
   qrCodeContainer: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 15,
     padding: 15,
     marginBottom: 20,
@@ -427,19 +423,19 @@ const styles = StyleSheet.create({
   linkTexto: {
     flex: 1,
     fontSize: 11,
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '600',
     fontFamily: 'monospace',
   },
   btnCopiarLink: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     padding: 10,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   btnFechar: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 10,

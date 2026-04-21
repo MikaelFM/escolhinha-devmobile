@@ -125,7 +125,7 @@ export default function AlteracaoSenha({ navigation }) {
     <SafeAreaView style={styles.container}>
       {loading && !sucesso ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.azul} />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.loadingText}>Atualizando senha...</Text>
         </View>
       ) : (
@@ -150,7 +150,7 @@ export default function AlteracaoSenha({ navigation }) {
             value={senhaAtual}
             onChangeText={v => setField('senhaAtual', v)}
             erro={erros.senhaAtual}
-            secureTextEntry
+            variante="senha"
           />
 
           <InputField
@@ -160,32 +160,8 @@ export default function AlteracaoSenha({ navigation }) {
             value={senhaNova}
             onChangeText={v => setField('senhaNova', v)}
             erro={erros.senhaNova}
-            secureTextEntry
+            variante="senha"
           />
-
-          {senhaNova && (
-            <View style={styles.requisitosCard}>
-              <Text style={styles.requisitosTitle}>Requisitos:</Text>
-              {[
-                { label: 'Mínimo 8 caracteres', check: senhaNova.length >= 8 },
-                { label: '1 letra maiúscula', check: /[A-Z]/.test(senhaNova) },
-                { label: '1 letra minúscula', check: /[a-z]/.test(senhaNova) },
-                { label: '1 número', check: /[0-9]/.test(senhaNova) },
-                { label: 'Sem espaços', check: !/[\s]/.test(senhaNova) },
-              ].map((req, idx) => (
-                <View key={idx} style={styles.requisito}>
-                  <Ionicons
-                    name={req.check ? 'checkmark-circle' : 'close-circle'}
-                    size={16}
-                    color={req.check ? '#16a34a' : '#cbd5e1'}
-                  />
-                  <Text style={[styles.requisitoTexto, { color: req.check ? '#16a34a' : '#cbd5e1' }]}>
-                    {req.label}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
 
           <InputField
             label="Confirmar Nova Senha"
@@ -194,7 +170,7 @@ export default function AlteracaoSenha({ navigation }) {
             value={senhaNovaConfirm}
             onChangeText={v => setField('senhaNovaConfirm', v)}
             erro={erros.senhaNovaConfirm}
-            secureTextEntry
+            variante="senha"
           />
 
           {sucesso && (
@@ -222,6 +198,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
     paddingHorizontal: 15,
+    paddingVertical: 30,
+  },
+  scroll: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  navBar: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 15,
     paddingVertical: 50,
   },
   scroll: {
@@ -235,40 +221,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  navBotaoVoltar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    backgroundColor: colors.azulPalido,
-    borderWidth: 1.5,
-    borderColor: colors.azulMedio,
-  },
-  navTextoVoltar: {
-    fontSize: 14,
-    color: colors.azul,
-    fontWeight: '600',
-  },
   header: {
     alignItems: 'center',
     marginBottom: 50,
-    marginTop: 10,
-  },
-  iconeBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: colors.azul,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    shadowColor: colors.azul,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
   },
   iconeTexto: {
     fontSize: 28,
@@ -276,7 +231,7 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 26,
     fontWeight: '700',
-    color: colors.azul,
+    color: colors.primary,
     letterSpacing: 0.3,
     marginBottom: 4,
   },
@@ -293,7 +248,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: colors.azul,
+    color: colors.primary,
     fontWeight: '600',
   },
   requisitosCard: {
@@ -308,7 +263,7 @@ const styles = StyleSheet.create({
   requisitosTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: colors.azul,
+    color: colors.primary,
     marginBottom: 8,
   },
   requisito: {
@@ -337,7 +292,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   botaoSalvar: {
-    backgroundColor: colors.azul,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
