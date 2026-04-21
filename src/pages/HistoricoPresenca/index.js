@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 const VERDE = '#16a34a';
 const VERMELHO = '#dc2626';
 
-export default function HistoricoPresencas({ navigation }: any) {
+export default function HistoricoPresencas({ navigation }) {
   const [busca, setBusca] = useState('');
   const [mesAtual, setMesAtual] = useState('Março/2026');
 
