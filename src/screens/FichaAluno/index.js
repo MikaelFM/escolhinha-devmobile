@@ -10,21 +10,13 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { alunosService } from '../../services/alunosService';
 import { mensalidadesService } from '../../services/mensalidadesService';
 import { maskApenasNumeros, maskCPF, maskData, maskTelefone } from '../../utils/masks';
-import { formatarMesAno } from '../../utils/formatters';
+import { formatarMesAno, obterIniciaisNome } from '../../utils/formatters';
 import styles from './styles';
-
-const getIniciais = (nomeCompleto) => {
-  if (!nomeCompleto) return '??';
-  const nomes = nomeCompleto.trim().split(/\s+/);
-  const primeira = nomes[0][0].toUpperCase();
-  const ultima = nomes.length > 1 ? nomes[nomes.length - 1][0].toUpperCase() : '';
-  return `${primeira}${ultima}`;
-};
 
 const VERDE = '#16a34a';
 const VERMELHO = '#dc2626';
@@ -66,7 +58,7 @@ export default function FichaAluno({ navigation, route }) {
         const rg = route?.params?.rg;
         
         if (!rg) {
-          setError('RG nÃ£o informado');
+          setError('RG não informado');
           setLoading(false);
           return;
         }
@@ -146,7 +138,7 @@ export default function FichaAluno({ navigation, route }) {
         ...prev,
         historicoPagamentos: estadoAnterior,
       }));
-      Alert.alert('Erro', err?.message || 'NÃ£o foi possÃ­vel atualizar a mensalidade.');
+      Alert.alert('Erro', err?.message || 'Não foi possível atualizar a mensalidade.');
     } finally {
       setSalvandoMensalidadeId(null);
     }
@@ -169,7 +161,7 @@ export default function FichaAluno({ navigation, route }) {
             navigation.goBack();
           } catch (err) {
             console.log('Erro ao excluir aluno:', err);
-            Alert.alert('Erro', err.message || 'NÃ£o foi possÃ­vel excluir o aluno.');
+            Alert.alert('Erro', err.message || 'Não foi possível excluir o aluno.');
           }
         },
       },
@@ -211,7 +203,7 @@ export default function FichaAluno({ navigation, route }) {
         
         <View style={styles.perfilCard}>
           <View style={styles.avatarIniciais}>
-            <Text style={styles.avatarIniciaisTexto}>{getIniciais(aluno.nome)}</Text>
+            <Text style={styles.avatarIniciaisTexto}>{obterIniciaisNome(aluno.nome)}</Text>
           </View>
           <Text style={styles.nomeAluno}>{aluno.nome}</Text>
           <View style={styles.badgeCategoria}>
@@ -239,7 +231,7 @@ export default function FichaAluno({ navigation, route }) {
           </View>
 
           <View style={styles.infoBoxFull}>
-            <Text style={styles.infoLabel}>RESPONSÃVEL</Text>
+            <Text style={styles.infoLabel}>RESPONSÁVEL</Text>
             <Text style={styles.infoTexto}>{aluno.nome_responsavel || 'N/A'}</Text>
           </View>
 
@@ -257,7 +249,7 @@ export default function FichaAluno({ navigation, route }) {
 
         <View style={styles.card}>
           <View style={styles.secaoHeaderRow}>
-            <Text style={styles.labelSecao}>FREQUÃŠNCIA RECENTE</Text>
+            <Text style={styles.labelSecao}>FREQUÊNCIA RECENTE</Text>
             <View style={styles.statsBadgeRow}>
               <Text style={styles.miniStat}>Faltas: {faltaTexto}</Text>
               <Text style={[styles.miniStat, {color: VERDE}]}>{frequenciaTexto}</Text>
@@ -288,7 +280,7 @@ export default function FichaAluno({ navigation, route }) {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.labelSecao}>HISTÃ“RICO FINANCEIRO</Text>
+          <Text style={styles.labelSecao}>HISTÓRICO FINANCEIRO</Text>
 
           {temHistoricoFinanceiro ? (
             <>
@@ -328,7 +320,7 @@ export default function FichaAluno({ navigation, route }) {
 
               <TouchableOpacity style={styles.btnVerMais} onPress={() => setVerTodoFinanceiro(!verTodoFinanceiro)}>
                 <Text style={styles.btnVerMaisTexto}>
-                  {verTodoFinanceiro ? "Ocultar histÃ³rico" : "Ver histÃ³rico completo"}
+                  {verTodoFinanceiro ? "Ocultar histórico" : "Ver histórico completo"}
                 </Text>
               </TouchableOpacity>
             </>
@@ -355,5 +347,7 @@ export default function FichaAluno({ navigation, route }) {
     </SafeAreaView>
   );
 }
+
+
 
 

@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   TextInput
 } from 'react-native';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './styles';
 
@@ -16,12 +16,12 @@ const VERMELHO = '#dc2626';
 
 export default function HistoricoPresencas({ navigation }) {
   const [busca, setBusca] = useState('');
-  const [mesAtual, setMesAtual] = useState('MarÃ§o/2026');
+  const [mesAtual, setMesAtual] = useState('Março/2026');
 
   const [listaAlunos] = useState([
     { 
       id: '1', 
-      nome: 'JoÃ£o Silva Cardoso', 
+      nome: 'João Silva Cardoso', 
       faltas: 1, 
       freq: '92%',
       ultimas: ['P', 'P', 'P', 'F', 'P'] 
@@ -55,7 +55,7 @@ export default function HistoricoPresencas({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header com NavegaÃ§Ã£o de Meses */}
+      {/* Header com Navegação de Meses */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color={colors.primary} />
@@ -68,10 +68,10 @@ export default function HistoricoPresencas({ navigation }) {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Resumo da Turma no MÃªs */}
+      {/* Resumo da Turma no Mês */}
       <View style={styles.resumoContainer}>
         <View style={styles.resumoCard}>
-          <Text style={styles.resumoLabel}>FREQ. MÃ‰DIA</Text>
+          <Text style={styles.resumoLabel}>FREQ. MÉDIA</Text>
           <Text style={[styles.resumoValor, {color: VERDE}]}>84%</Text>
         </View>
         <View style={styles.resumoCard}>
@@ -92,7 +92,7 @@ export default function HistoricoPresencas({ navigation }) {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
-        <Text style={styles.secaoTitulo}>FREQUÃŠNCIA DOS ALUNOS</Text>
+        <Text style={styles.secaoTitulo}>FREQUÊNCIA DOS ALUNOS</Text>
         
         {alunosFiltrados.map((aluno) => {
           const alertaEvasao = aluno.faltas >= 3;
@@ -117,7 +117,7 @@ export default function HistoricoPresencas({ navigation }) {
                 )}
               </View>
 
-              {/* Mini visualizaÃ§Ã£o das Ãºltimas 5 chamadas */}
+              {/* Mini visualização das últimas 5 chamadas */}
               <View style={styles.miniChamadaContainer}>
                 {aluno.ultimas.map((status, index) => (
                   <View 
@@ -138,5 +138,7 @@ export default function HistoricoPresencas({ navigation }) {
     </SafeAreaView>
   );
 }
+
+
 
 

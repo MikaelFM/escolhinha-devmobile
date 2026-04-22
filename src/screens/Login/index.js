@@ -13,9 +13,10 @@ import {
 import * as LocalAuthentication from 'expo-local-authentication';
 
 import InputField from '../../components/InputField';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import { useAuth } from '../../contexts/AuthContext';
 import { tokenService } from '../../services/tokenService';
+import { verificarSuporteBiometria } from '../../utils/biometria';
 import styles from './styles';
 
 export default function Login() {
@@ -32,14 +33,13 @@ export default function Login() {
   useEffect(() => {
     const verificarBiometriaDisponivel = async () => {
       try {
-        const [hasHardware, isEnrolled, temBiometriaAtiva, preferenciaBiometria] = await Promise.all([
-          LocalAuthentication.hasHardwareAsync(),
-          LocalAuthentication.isEnrolledAsync(),
+        const [suporteBiometria, temBiometriaAtiva, preferenciaBiometria] = await Promise.all([
+          verificarSuporteBiometria(),
           tokenService.temBiometriaAtiva(),
           tokenService.obterPreferenciaBiometria(),
         ]);
 
-        setBiometriaDisponivel(hasHardware && isEnrolled && temBiometriaAtiva && preferenciaBiometria);
+        setBiometriaDisponivel(suporteBiometria && temBiometriaAtiva && preferenciaBiometria);
       } catch (e) {
         setBiometriaDisponivel(false);
       }
@@ -107,7 +107,7 @@ export default function Login() {
         setErro(resultado.mensagem);
       }
     } catch (error) {
-      setErro('NÃ£o foi possÃ­vel autenticar com biometria.');
+      setErro('Não foi possível autenticar com biometria.');
     } finally {
       setCarregandoBiometria(false);
     }
@@ -179,5 +179,6 @@ export default function Login() {
     </SafeAreaView>
   );
 }
+
 
 

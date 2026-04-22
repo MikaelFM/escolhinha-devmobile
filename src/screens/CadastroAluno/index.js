@@ -13,7 +13,7 @@ import {
 import { maskApenasNumeros, maskCPF, maskData, maskTelefone } from '../../utils/masks';
 import { validaCPF, validaData, validaObrigatorio, validaTelefone } from '../../utils/validators';
 import InputField from '../../components/InputField';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import { alunosService } from '../../services';
 import { categoriasService } from '../../services/categoriasService';
 import { responsavelService } from '../../services/responsavelService';
@@ -67,7 +67,7 @@ export default function CadastroAluno({ navigation, route }) {
         const aluno = response?.data ?? response;
 
         if (!aluno) {
-          throw new Error('Aluno nÃ£o encontrado.');
+          throw new Error('Aluno não encontrado.');
         }
 
         setForm({
@@ -84,7 +84,7 @@ export default function CadastroAluno({ navigation, route }) {
 
         setRgOriginal(normalizarTexto(aluno.rg_aluno || aluno.rg || idDaRota));
       } catch (erro) {
-        console.log('Erro ao carregar aluno para ediÃ§Ã£o:', erro);
+        console.log('Erro ao carregar aluno para edição:', erro);
       } finally {
         setCarregandoAluno(false);
       }
@@ -120,8 +120,8 @@ export default function CadastroAluno({ navigation, route }) {
 
   const validar = () => {
     const novosErros = {
-      nome: validaObrigatorio(form.nome, 'Nome Ã© obrigatÃ³rio.'),
-      rg: validaObrigatorio(form.rg, 'RG Ã© obrigatÃ³rio.'),
+      nome: validaObrigatorio(form.nome, 'Nome é obrigatório.'),
+      rg: validaObrigatorio(form.rg, 'RG é obrigatório.'),
       telefone: validaTelefone(form.telefone),
       cpf_responsavel: form.cpf_responsavel ? validaCPF(form.cpf_responsavel) : '',
       nome_responsavel: '',
@@ -214,7 +214,7 @@ export default function CadastroAluno({ navigation, route }) {
             <InputField
               label="Nome completo"
               obrigatorio
-              placeholder="Ex: JoÃ£o da Silva"
+              placeholder="Ex: João da Silva"
               value={form.nome}
               onChangeText={v => setField('nome', v)}
               erro={erros.nome}
@@ -256,7 +256,7 @@ export default function CadastroAluno({ navigation, route }) {
             />
 
             <InputField
-              label="CPF do responsÃ¡vel"
+              label="CPF do responsável"
               placeholder="000.000.000-00"
               value={form.cpf_responsavel}
               onChangeText={v => onChangeCpfResponsavel(v)}
@@ -268,7 +268,7 @@ export default function CadastroAluno({ navigation, route }) {
             {possuiCpf_responsavel && (
               <>
                 <InputField
-                  label="Nome do responsÃ¡vel"
+                  label="Nome do responsável"
                   placeholder="Ex: Maria da Silva"
                   value={form.nome_responsavel}
                   onChangeText={v => setField('nome_responsavel', v)}
@@ -277,7 +277,7 @@ export default function CadastroAluno({ navigation, route }) {
                 />
 
                 <InputField
-                  label="Telefone do responsÃ¡vel"
+                  label="Telefone do responsável"
                   placeholder="(54) 98182-0000"
                   value={form.telefone_responsavel}
                   onChangeText={v => setField('telefone_responsavel', v)}
@@ -302,7 +302,7 @@ export default function CadastroAluno({ navigation, route }) {
             {sucesso && (
               <View style={styles.sucessoBox}>
                 <Text style={styles.sucessoTexto}>
-                  {modoEdicao ? 'âœ“ Aluno atualizado com sucesso!' : 'âœ“ Aluno cadastrado com sucesso!'}
+                  {modoEdicao ? '✓ Aluno atualizado com sucesso!' : '✓ Aluno cadastrado com sucesso!'}
                 </Text>
               </View>
             )}
@@ -313,7 +313,7 @@ export default function CadastroAluno({ navigation, route }) {
               onPress={handleSalvar}
               disabled={carregandoAluno}
             >
-              <Text style={styles.botaoSalvarTexto}>{modoEdicao ? 'Salvar alteraÃ§Ãµes' : 'Salvar'}</Text>
+              <Text style={styles.botaoSalvarTexto}>{modoEdicao ? 'Salvar alterações' : 'Salvar'}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -322,5 +322,7 @@ export default function CadastroAluno({ navigation, route }) {
     </SafeAreaView>
   );
 }
+
+
 
 

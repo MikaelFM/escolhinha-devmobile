@@ -4,10 +4,10 @@
     "slug": "devmobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/images/assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./src/images/assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,25 +17,28 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./src/images/assets/android-icon-foreground.png",
+        "backgroundImage": "./src/images/assets/android-icon-background.png",
+        "monochromeImage": "./src/images/assets/android-icon-monochrome.png"
       },
       "package": "com.anonymous.devmobile",
       "googleServicesFile": "./google-services.json"
     },
     "androidNavigationBar": {
-      "backgroundColor": "#000000",
-      "buttonColor": "white"
+      "backgroundColor": "#000000"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./src/images/assets/favicon.png"
     },
     "extra": {
       "eas": {
         "projectId": "5586ee22-338a-449e-a5bb-3b120bbb930e"
       }
     },
-    "owner": "mikaelfms-organization"
+    "owner": "mikaelfms-organization",
+    "plugins": [
+      "expo-font",
+      "@react-native-community/datetimepicker"
+    ]
   }
 }

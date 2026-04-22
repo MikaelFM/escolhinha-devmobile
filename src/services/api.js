@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { tokenService } from './tokenService';
 
-const BASE_URL = 'http://192.168.0.106:5000/' //'https://api-projeto-mobile-1.onrender.com/';
+import { API_CONFIG } from '../constants'; // Importa o objeto completo
 
 let onUnauthorized = null;
 
@@ -11,8 +11,8 @@ export const setUnauthorizedHandler = (handler) => {
 
 
 const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 30000,
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
   },

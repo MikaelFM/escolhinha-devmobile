@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { mensalidadesService } from '../../services';
 import {
@@ -216,7 +216,7 @@ export default function HistoricoMensalidades({ navigation }) {
     } catch (error) {
       console.log('Erro ao atualizar mensalidade:', error);
       setDados(estadoAnterior);
-      Alert.alert('Erro', error?.message || 'NÃ£o foi possÃ­vel atualizar a mensalidade.');
+      Alert.alert('Erro', error?.message || 'Não foi possível atualizar a mensalidade.');
     } finally {
       setSalvandoId(null);
     }
@@ -319,7 +319,7 @@ export default function HistoricoMensalidades({ navigation }) {
                   <View style={styles.infoFinanceira}>
                       <Text style={styles.valorTexto}>{item.valor}</Text>
                       {isPago && item.dataPagamento && (
-                        <Text style={styles.dataTexto}> â€¢ Pago em {item.dataPagamento}</Text>
+                        <Text style={styles.dataTexto}> • Pago em {item.dataPagamento}</Text>
                       )}
                   </View>
                   <Text style={styles.mesRefTexto}>Referente a {item.mesReferencia}</Text>
@@ -343,5 +343,7 @@ export default function HistoricoMensalidades({ navigation }) {
     </SafeAreaView>
   );
 }
+
+
 
 

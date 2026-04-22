@@ -4,17 +4,14 @@ import {
   Text,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
-  Switch,
   Alert,
-  ActivityIndicator
 } from 'react-native';
-import * as LocalAuthentication from 'expo-local-authentication';
-import { colors } from '../../constants/colors';
-import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { tokenService } from '../../services/tokenService';
 import { authService } from '../../services/authService';
+import { obterIniciaisNome } from '../../utils/formatters';
+import { validarDisponibilidadeBiometriaComAlertas } from '../../utils/biometria';
+import SettingsOptionItem from '../../components/SettingsOptionItem';
 import styles from './styles';
 
 export default function ConfiguracoesAluno({ navigation }) {
@@ -32,22 +29,6 @@ export default function ConfiguracoesAluno({ navigation }) {
     carregarPreferenciaBiometria();
   }, []);
 
-  const validarDisponibilidadeBiometria = async () => {
-    const hasHardware = await LocalAuthentication.hasHardwareAsync();
-    if (!hasHardware) {
-      Alert.alert('Biometria indisponÃ­vel', 'Este dispositivo nÃ£o possui suporte para biometria.');
-      return false;
-    }
-
-    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-    if (!isEnrolled) {
-      Alert.alert('Biometria nÃ£o configurada', 'Cadastre sua digital ou Face ID nas configuraÃ§Ãµes do aparelho.');
-      return false;
-    }
-
-    return true;
-  };
-
   const handleToggleBiometria = async () => {
     if (biometriaLoading) return;
 
@@ -56,7 +37,7 @@ export default function ConfiguracoesAluno({ navigation }) {
 
     try {
       if (novoValor) {
-        const podeAtivar = await validarDisponibilidadeBiometria();
+        const podeAtivar = await validarDisponibilidadeBiometriaComAlertas();
         if (!podeAtivar) {
           return;
         }
@@ -64,13 +45,13 @@ export default function ConfiguracoesAluno({ navigation }) {
         try {
           const ativacao = await authService.ativarLoginBiometria();
           if (!ativacao?.sucesso) {
-            Alert.alert('Falha ao ativar', 'Servidor nÃ£o retornou token biomÃ©trico para este dispositivo.');
+            Alert.alert('Falha ao ativar', 'Servidor não retornou token biométrico para este dispositivo.');
             return;
           }
         } catch (erroAtivacao) {
           Alert.alert(
             'Falha ao ativar',
-            erroAtivacao?.message || 'NÃ£o foi possÃ­vel ativar o login biomÃ©trico agora. Tente novamente.'
+            erroAtivacao?.message || 'Não foi possível ativar o login biométrico agora. Tente novamente.'
           );
           return;
         }
@@ -89,43 +70,7 @@ export default function ConfiguracoesAluno({ navigation }) {
     rg: userData?.rg_aluno || 'Sem RG',
   };
 
-  const iniciais = usuario.nome
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((parte) => parte[0]?.toUpperCase() || '')
-    .join('') || 'AL';
-
-  const OptionItem = ({ icone, titulo, subtitulo, onPress, valor, isSwitch, isDanger, loading = false }) => (
-    <TouchableOpacity 
-      style={styles.cardOpcao} 
-      onPress={onPress} 
-      disabled={isSwitch || loading}
-      activeOpacity={0.7}
-    >
-      <View style={styles.iconWrapper}>
-        <Ionicons name={icone} size={22} color={isDanger ? colors.error : colors.primary} />
-      </View>
-      <View style={{ flex: 1, marginLeft: 15 }}>
-        <Text style={[styles.opcaoTitulo, isDanger && styles.opcaoTituloDanger]}>{titulo}</Text>
-        {subtitulo && <Text style={styles.opcaoSubtitulo}>{subtitulo}</Text>}
-      </View>
-      {isSwitch && loading ? (
-        <ActivityIndicator size="small" color={colors.primary} />
-      ) : isSwitch ? (
-        <Switch
-          trackColor={{ false: '#cbd5e1', true: colors.primaryBorder }}
-          thumbColor={valor ? colors.primary : '#94a3b8'}
-          onValueChange={onPress}
-          value={valor}
-          disabled={loading}
-        />
-      ) : (
-        <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
-      )}
-    </TouchableOpacity>
-  );
+  const iniciais = obterIniciaisNome(usuario.nome, 'AL');
 
   const handleLogout = () => {
     Alert.alert("Sair", "Deseja realmente sair da conta?", [
@@ -145,7 +90,7 @@ export default function ConfiguracoesAluno({ navigation }) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.topHeader}>
           <Text style={styles.titulo}>Ajustes</Text>
-          <Text style={styles.subtitulo}>Gerencie sua conta e preferÃªncias</Text>
+          <Text style={styles.subtitulo}>Gerencie sua conta e preferências</Text>
         </View>
 
         <View style={styles.bottomSheet}>
@@ -162,9 +107,10 @@ export default function ConfiguracoesAluno({ navigation }) {
             </View>
           </View>
 
-          <Text style={styles.secaoTitulo}>SEGURANÃ‡A E ACESSO</Text>
+          <Text style={styles.secaoTitulo}>SEGURANÇA E ACESSO</Text>
           <View style={styles.grupoCards}>
-            <OptionItem 
+            <SettingsOptionItem
+              styles={styles}
               icone="finger-print-outline" 
               titulo="Acesso por Biometria" 
               subtitulo="Usar FaceID ou Digital para entrar"
@@ -173,26 +119,28 @@ export default function ConfiguracoesAluno({ navigation }) {
               loading={biometriaLoading}
               onPress={handleToggleBiometria}
             />
-            <OptionItem 
+            <SettingsOptionItem
+              styles={styles}
               icone="lock-closed-outline" 
               titulo="Alterar Senha" 
               onPress={() => navigation.navigate('alteracaoSenha')}
             />
-            <OptionItem 
+            <SettingsOptionItem
+              styles={styles}
               icone="log-out-outline" 
               titulo="Sair da Conta" 
-              subtitulo="Encerrar sua sessao neste dispositivo"
+              subtitulo="Encerrar sua sessão neste dispositivo"
               isDanger
               onPress={handleLogout}
             />
           </View>
 
-        {/* SEÃ‡ÃƒO: PREFERÃŠNCIAS */}
-        {/* <Text style={styles.secaoTitulo}>PREFERÃŠNCIAS</Text>
+        {/* SEÇÃO: PREFERÊNCIAS */}
+        {/* <Text style={styles.secaoTitulo}>PREFERÊNCIAS</Text>
         <View style={styles.grupoCards}>
           <OptionItem 
             icone="notifications-outline" 
-            titulo="NotificaÃ§Ãµes Push" 
+            titulo="Notificações Push" 
             subtitulo="Alertas de treinos e mensalidades"
             isSwitch
             valor={notificacoesAtivas}
@@ -206,7 +154,7 @@ export default function ConfiguracoesAluno({ navigation }) {
           />
         </View> */}
 
-        {/* SEÃ‡ÃƒO: SUPORTE */}
+        {/* SEÇÃO: SUPORTE */}
         {/* <Text style={styles.secaoTitulo}>ESCOLINHA</Text>
         <View style={styles.grupoCards}>
           <OptionItem 
@@ -221,12 +169,14 @@ export default function ConfiguracoesAluno({ navigation }) {
           />
         </View> */}
 
-          <Text style={styles.versao}>VersÃ£o 1.0.4 (Beta)</Text>
+          <Text style={styles.versao}>Versão 1.0.4 (Beta)</Text>
         </View>
 
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+
 
 

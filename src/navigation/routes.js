@@ -1,9 +1,11 @@
+import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import Home from '../screens/Home';
+import HomeAluno from '../screens/HomeAluno';
 import FichaAluno from '../screens/FichaAluno';
 import RegistroPresenca from '../screens/RegistroPresenca';
 import ListAlunos from '../screens/ListAlunos';
@@ -11,7 +13,7 @@ import HistoricoMensalidades from '../screens/HistoricoMensalidades';
 import CadastroAluno from '../screens/CadastroAluno';
 import AlteracaoSenha from '../screens/AlteracaoSenha';
 import Configuracoes from '../screens/Configuracoes';
-import { colors } from '../constants/colors';
+import { colors } from '../global/colors';
 
 const Stack = createStackNavigator();
 
@@ -30,57 +32,36 @@ const headerComVoltar = {
   headerLeft: () => <BackButton />,
 };
 
-export default function Routes () {
+export default function Routes({ userRole }) {
   return (
-    <Stack.Navigator screenOptions={{
-      animation: 'none',
-      headerStyle: {
-        elevation: 0,
-        shadowOpacity: 0,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e2e8f0',
-      }
-    }}>
-      <Stack.Screen
-        name="home"
-        component={Home}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="fichaAluno"
-        component={FichaAluno}
-        options={{ ...headerComVoltar, headerTitle: 'Ficha do Aluno' }}
-      />
-      <Stack.Screen
-        name="registroPresenca"
-        component={RegistroPresenca}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="listAlunos"
-        component={ListAlunos}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="historicoMensalidades"
-        component={HistoricoMensalidades}
-        options={{ ...headerComVoltar, headerTitle: 'Mensalidades' }}
-      />
-      <Stack.Screen
-        name="cadastroAluno"
-        component={CadastroAluno}
-        options={{ ...headerComVoltar, headerTitle: '' }}
-      />
-      <Stack.Screen
-        name="alteracaoSenha"
-        component={AlteracaoSenha}
-        options={{  ...headerComVoltar, headerTitle: '', }}
-      />
-      <Stack.Screen
-        name="configuracoes"
-        component={Configuracoes}
-        options={{  ...headerComVoltar, headerTitle: '', }}
-      />
+    <Stack.Navigator 
+      screenOptions={{
+        animation: 'none',
+        headerStyle: {
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 1,
+          borderBottomColor: '#e2e8f0',
+        }
+      }}
+    >
+      {userRole === 'professor' ? (
+        <>
+          <Stack.Screen name="home" component={Home} options={{ headerShown: false }} />
+          <Stack.Screen name="fichaAluno" component={FichaAluno} options={{ ...headerComVoltar, headerTitle: 'Ficha do Aluno' }} />
+          <Stack.Screen name="registroPresenca" component={RegistroPresenca} options={{ headerShown: false }} />
+          <Stack.Screen name="listAlunos" component={ListAlunos} options={{ headerShown: false }} />
+          <Stack.Screen name="historicoMensalidades" component={HistoricoMensalidades} options={{ ...headerComVoltar, headerTitle: 'Mensalidades' }} />
+          <Stack.Screen name="cadastroAluno" component={CadastroAluno} options={{ ...headerComVoltar, headerTitle: '' }} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="homeAluno" component={HomeAluno} options={{ headerShown: false }} />
+        </>
+      )}
+
+      <Stack.Screen name="alteracaoSenha" component={AlteracaoSenha} options={{ ...headerComVoltar, headerTitle: '' }} />
+      <Stack.Screen name="configuracoes" component={Configuracoes} options={{ ...headerComVoltar, headerTitle: '' }} />
     </Stack.Navigator>
   );
 }

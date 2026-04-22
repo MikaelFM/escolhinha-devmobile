@@ -11,12 +11,13 @@ import {
   Modal,
   Image
 } from 'react-native';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { mensalidadesService } from '../../services/mensalidadesService';
 import { cobrancaService } from '../../services/cobrancaService';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatarDataBR, formatarMesAno } from '../../utils/formatters';
+import MensalidadeItemCard from '../../components/MensalidadeItemCard';
 import styles from './styles';
 
 const VERDE = '#16a34a';
@@ -42,7 +43,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
 
         if (!rgAluno) {
           setMensalidades([]);
-          setError('RG nÃ£o informado');
+          setError('RG não informado');
           return;
         }
 
@@ -79,7 +80,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
 
   const handleCopiarPix = (codigo) => {
     Clipboard.setString(codigo);
-    Alert.alert('Pix Copiado!', 'O cÃ³digo Copia e Cola foi copiado para sua Ã¡rea de transferÃªncia.');
+    Alert.alert('Pix Copiado!', 'O código Copia e Cola foi copiado para sua área de transferência.');
   };
 
   const handleGerarCobrancaPix = async (idMensalidade) => {
@@ -93,11 +94,11 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
         setPixData({ link, qr_code_img });
         setPixModalVisible(true);
       } else {
-        Alert.alert('Erro', 'NÃ£o foi possÃ­vel gerar o QR code');
+        Alert.alert('Erro', 'Não foi possível gerar o QR code');
       }
     } catch (err) {
-      console.log('Erro ao gerar cobranÃ§a PIX:', err);
-      Alert.alert('Erro', err?.message || 'Erro ao gerar cobranÃ§a PIX');
+      console.log('Erro ao gerar cobrança PIX:', err);
+      Alert.alert('Erro', err?.message || 'Erro ao gerar cobrança PIX');
     } finally {
       setPixLoading(false);
     }
@@ -110,49 +111,6 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
     return { total, pagas, pendentes };
   }, [mensalidades]);
 
-  const MensalidadeItem = ({ item }) => {
-    const isPago = item.status === 'Pago';
-
-    return (
-      <View style={[styles.cardMensalidade, !isPago && styles.cardPendente]}>
-        <View style={[styles.iconWrapper, { backgroundColor: isPago ? '#f0fdf4' : '#fff7ed' }]}>
-          <Ionicons
-            name={isPago ? 'checkmark-circle-outline' : 'alert-circle-outline'}
-            size={24}
-            color={isPago ? VERDE : LARANJA}
-          />
-        </View>
-
-        <View style={{ flex: 1, marginLeft: 15 }}>
-          <Text style={styles.mesTitulo}>{item.mes}</Text>
-          <Text style={styles.valorSubtitulo}>
-            {item.valor} â€¢ {isPago ? `Pago em ${item.dataPagamento}` : 'Em aberto'}
-          </Text>
-          {item.pagoViaPix && <Text style={styles.pixInfo}>Pago via PIX</Text>}
-        </View>
-
-        {!isPago ? (
-          <TouchableOpacity
-            style={styles.btnPix}
-            onPress={() => handleGerarCobrancaPix(item.id)}
-            disabled={pixLoading}
-          >
-            {pixLoading ? (
-              <ActivityIndicator size='small' color='#fff' />
-            ) : (
-              <Ionicons name='copy-outline' size={18} color='#fff' />
-            )}
-            <Text style={styles.btnPixTexto}>{pixLoading ? 'Gerando...' : 'PIX'}</Text>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.badgePago}>
-            <Text style={styles.badgePagoTexto}>PAGO</Text>
-          </View>
-        )}
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -161,7 +119,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
             <Ionicons name='chevron-back' size={28} color={colors.primary} />
           </TouchableOpacity>
           <Text style={styles.titulo}>Mensalidades</Text>
-          <Text style={styles.subtitulo}>HistÃ³rico de pagamentos e cobranÃ§as</Text>
+          <Text style={styles.subtitulo}>Histórico de pagamentos e cobranças</Text>
         </View>
 
         <View style={styles.resumoCard}>
@@ -177,7 +135,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
         </View>
 
         <View style={styles.bottomSheet}>
-          <Text style={styles.secaoTitulo}>HISTÃ“RICO RECENTE</Text>
+          <Text style={styles.secaoTitulo}>HISTÓRICO RECENTE</Text>
 
           <View style={styles.listaContainer}>
             {loading ? (
@@ -191,7 +149,17 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : mensalidades.length > 0 ? (
-              mensalidades.map((item) => <MensalidadeItem key={item.id} item={item} />)
+              mensalidades.map((item) => (
+                <MensalidadeItemCard
+                  key={item.id}
+                  styles={styles}
+                  item={item}
+                  pixLoading={pixLoading}
+                  onGerarPix={handleGerarCobrancaPix}
+                  verde={VERDE}
+                  laranja={LARANJA}
+                />
+              ))
             ) : (
               <Text style={styles.vazioTexto}>Nenhum registro</Text>
             )}
@@ -200,7 +168,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
           <View style={styles.infoFooter}>
             <Ionicons name='shield-checkmark-outline' size={16} color={colors.textPlaceholder} />
             <Text style={styles.infoFooterTexto}>
-              Pagamentos via PIX sÃ£o baixados automaticamente em atÃ© 30 minutos.
+              Pagamentos via PIX são baixados automaticamente em até 30 minutos.
             </Text>
           </View>
         </View>
@@ -222,7 +190,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
               <Ionicons name='close' size={24} color={colors.primary} />
             </TouchableOpacity>
 
-            <Text style={styles.modalTitulo}>CÃ³digo QR - PIX</Text>
+            <Text style={styles.modalTitulo}>Código QR - PIX</Text>
 
             {pixData.qr_code_img && (
               <View style={styles.qrCodeContainer}>
@@ -233,7 +201,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
               </View>
             )}
 
-            <Text style={styles.modalSubtitulo}>Ou copie o cÃ³digo PIX Copia e Cola:</Text>
+            <Text style={styles.modalSubtitulo}>Ou copie o código PIX Copia e Cola:</Text>
 
             <View style={styles.linkContainer}>
               <Text style={styles.linkTexto} numberOfLines={3}>
@@ -261,5 +229,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
     </SafeAreaView>
   );
 }
+
+
 
 

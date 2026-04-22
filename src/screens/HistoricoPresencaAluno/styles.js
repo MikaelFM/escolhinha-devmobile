@@ -1,5 +1,10 @@
 ﻿import { StyleSheet } from 'react-native';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
+
+const VERDE = '#16a34a';
+const VERMELHO = '#dc2626';
+const AZUL_CLARO = '#e0f2fe';
+const LARANJA = '#f59e0b';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },

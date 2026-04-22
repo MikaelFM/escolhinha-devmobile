@@ -8,7 +8,7 @@ import {
   Alert,
   ActivityIndicator
 } from 'react-native';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
 import InputField from '../../components/InputField';
 import { authService } from '../../services/authService';
@@ -33,11 +33,11 @@ export default function AlteracaoSenha({ navigation }) {
     return {
       valida: temMaipuscula && temMinuscula && temNumero && !temEspacoOuCaractereEspecial && senha.length >= 8,
       erros: [
-        !temMaipuscula ? 'MÃ­nimo 1 letra maiÃºscula' : null,
-        !temMinuscula ? 'MÃ­nimo 1 letra minÃºscula' : null,
-        !temNumero ? 'MÃ­nimo 1 nÃºmero' : null,
-        temEspacoOuCaractereEspecial ? 'Sem espaÃ§os em branco' : null,
-        senha.length < 8 ? 'MÃ­nimo 8 caracteres' : null,
+        !temMaipuscula ? 'Mínimo 1 letra maiúscula' : null,
+        !temMinuscula ? 'Mínimo 1 letra minúscula' : null,
+        !temNumero ? 'Mínimo 1 número' : null,
+        temEspacoOuCaractereEspecial ? 'Sem espaços em branco' : null,
+        senha.length < 8 ? 'Mínimo 8 caracteres' : null,
       ].filter(Boolean),
     };
   };
@@ -65,11 +65,11 @@ export default function AlteracaoSenha({ navigation }) {
     }
 
     if (senhaNova && senhaNovaConfirm && senhaNova !== senhaNovaConfirm) {
-      novosErros.senhaNovaConfirm = 'As senhas nÃ£o coincidem';
+      novosErros.senhaNovaConfirm = 'As senhas não coincidem';
     }
 
     if (senhaAtual && senhaNova && senhaAtual === senhaNova) {
-      novosErros.senhaNova = 'NÃ£o pode ser igual Ã  senha atual';
+      novosErros.senhaNova = 'Não pode ser igual à senha atual';
     }
 
     const validacao = validarSenha(senhaNova);
@@ -175,7 +175,7 @@ export default function AlteracaoSenha({ navigation }) {
 
           {sucesso && (
             <View style={styles.sucessoBox}>
-              <Text style={styles.sucessoTexto}>âœ“ Senha alterada com sucesso!</Text>
+              <Text style={styles.sucessoTexto}>✓ Senha alterada com sucesso!</Text>
             </View>
           )}
 
@@ -192,5 +192,7 @@ export default function AlteracaoSenha({ navigation }) {
     </SafeAreaView>
   );
 }
+
+
 
 

@@ -10,8 +10,15 @@ import {
   Platform
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import InputField from '../../components/InputField';
+import {
+  formatarDataBR,
+  converterDataBRParaDate,
+  formatarIsoParaBr,
+  formatarBrParaIsoCurta,
+} from '../../utils/formatters';
+import RegistroAlunoCard from '../../components/RegistroAlunoCard';
 import { categoriasService } from '../../services/categoriasService';
 import { presencaService } from '../../services/presencaService';
 import styles from './styles';
@@ -19,29 +26,6 @@ import styles from './styles';
 const CRIAR_NOVA_DATA = 'Criar nova data';
 const VERDE = '#16a34a';
 const VERMELHO = '#dc2626';
-
-const formatarDataBR = (data) => {
-  const dia = String(data.getDate()).padStart(2, '0');
-  const mes = String(data.getMonth() + 1).padStart(2, '0');
-  const ano = data.getFullYear();
-  return `${dia}/${mes}/${ano}`;
-};
-
-const converterDataBRParaDate = (texto) => {
-  const [dia, mes, ano] = String(texto || '').split('/').map(Number);
-  if (!dia || !mes || !ano) return new Date();
-  return new Date(ano, mes - 1, dia);
-};
-
-const normalizarDataApiParaBR = (valor) => {
-  if (!valor) return '';
-  const texto = String(valor).trim();
-  const isoMatch = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (isoMatch) return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
-  const data = new Date(texto);
-  if (!Number.isNaN(data.getTime())) return formatarDataBR(data);
-  return texto;
-};
 
 const gerarChaveAlunoPresenca = (item, index) => {
   const id = item?.id ?? 'sem-id';
@@ -63,12 +47,6 @@ export default function RegistroPresenca() {
   const [presencasAntesEdicao, setPresencasAntesEdicao] = useState(null);
   const [pickerVisivel, setPickerVisivel] = useState(false);
   const [dataPicker, setDataPicker] = useState(new Date());
-
-  const converterDataBRParaApi = (texto) => {
-    const [dia, mes, ano] = String(texto || '').split('/');
-    if (!dia || !mes || !ano) return '';
-    return `${ano}-${mes}-${dia}`;
-  };
 
   const categoriaSelecionada = categorias.find((item) => item.nome === categoria);
   const idCategoriaSelecionada = categoriaSelecionada?.id;
@@ -105,7 +83,7 @@ export default function RegistroPresenca() {
         const listaBruta = resposta?.datas ?? resposta?.data?.datas ?? resposta?.data ?? [];
         const datas = Array.isArray(listaBruta)
           ? listaBruta
-              .map((item) => normalizarDataApiParaBR(item?.data_presenca ?? item?.data ?? item))
+              .map((item) => formatarIsoParaBr(item?.data_presenca ?? item?.data ?? item))
               .filter(Boolean)
           : [];
 
@@ -113,7 +91,7 @@ export default function RegistroPresenca() {
         setDatasOpcoes(novasOpcoes);
         setDataSelecionada(dataAtual);
       } catch (error) {
-        console.log('Erro ao carregar datas lanÃ§adas:', error);
+        console.log('Erro ao carregar datas lançadas:', error);
       }
     };
     carregarDatasLancadas();
@@ -121,7 +99,7 @@ export default function RegistroPresenca() {
 
   useEffect(() => {
     const carregarListaPresenca = async () => {
-      const dataApi = converterDataBRParaApi(dataSelecionada);
+      const dataApi = formatarBrParaIsoCurta(dataSelecionada);
       if (!dataApi || !idCategoriaSelecionada) {
         setAlunos([]);
         setPresencas({});
@@ -164,7 +142,7 @@ export default function RegistroPresenca() {
 
   const iniciarEdicaoPresenca = () => {
     if (!idCategoriaSelecionada) {
-      Alert.alert('AtenÃ§Ã£o', 'Selecione uma categoria antes de iniciar.');
+      Alert.alert('Atenção', 'Selecione uma categoria antes de iniciar.');
       return;
     }
     setPresencasAntesEdicao({ ...presencas });
@@ -188,9 +166,9 @@ export default function RegistroPresenca() {
 
   const handleSalvar = () => {
     if (isSaving) return;
-    const dataApi = converterDataBRParaApi(dataSelecionada);
+    const dataApi = formatarBrParaIsoCurta(dataSelecionada);
     if (!dataApi || !idCategoriaSelecionada) {
-      Alert.alert('AtenÃ§Ã£o', 'Data e categoria sÃ£o obrigatÃ³rios.');
+      Alert.alert('Atenção', 'Data e categoria são obrigatórios.');
       return;
     }
     const alunosPayload = alunos
@@ -200,7 +178,7 @@ export default function RegistroPresenca() {
         presente: !!presencas[aluno.id],
       }));
     if (alunosPayload.length === 0) {
-      Alert.alert('AtenÃ§Ã£o', 'Nenhum aluno encontrado para salvar.');
+      Alert.alert('Atenção', 'Nenhum aluno encontrado para salvar.');
       return;
     }
     setIsSaving(true);
@@ -222,36 +200,13 @@ export default function RegistroPresenca() {
     setPickerVisivel(true);
   };
 
-  const renderAluno = ({ item }) => {
-    const statusConhecido = presencas.hasOwnProperty(item.id);
-    const isPresente = presencas[item.id] === true;
-    return (
-      <TouchableOpacity 
-        style={[styles.cardAluno, !statusConhecido ? styles.cardSemRegistro : (isPresente ? styles.cardPresente : styles.cardAusente)]} 
-        onPress={() => togglePresenca(item.id)}
-        disabled={!isEditMode}
-      >
-        <View style={{ flex: 1 }}>
-          <View style={[styles.statusLinhaColorida, !statusConhecido ? styles.statusCinza : (isPresente ? styles.statusVerde : styles.statusVermelho)]} />
-          <Text style={[styles.nomeAluno, !isPresente && statusConhecido && { color: '#991b1b' }]}>{item.nome}</Text>
-          <Text style={styles.subtituloAluno}>{!statusConhecido ? 'Sem registro' : (isPresente ? 'Presente' : 'Faltou')}</Text>
-        </View>
-        {isEditMode && (
-          <View style={[styles.checkbox, isPresente ? styles.checkboxChecked : styles.checkboxUnchecked]}>
-            <Text style={styles.checkText}>{isPresente ? 'âœ“' : 'âœ•'}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.titulo}>Chamada</Text>
           <View style={[styles.badge, isEditMode ? styles.badgeEdicao : styles.badgeLeitura]}>
-            <Text style={styles.badgeTexto}>{isEditMode ? 'EDIÃ‡ÃƒO' : 'VISUALIZAÃ‡ÃƒO'}</Text>
+            <Text style={styles.badgeTexto}>{isEditMode ? 'EDIÇÃO' : 'VISUALIZAÇÃO'}</Text>
           </View>
         </View>
         <Text style={styles.subtitulo}>Selecione a data e categoria para filtrar.</Text>
@@ -284,7 +239,21 @@ export default function RegistroPresenca() {
       <FlatList
         data={alunos}
         keyExtractor={item => item.id}
-        renderItem={renderAluno}
+        renderItem={({ item }) => {
+          const statusConhecido = Object.prototype.hasOwnProperty.call(presencas, item.id);
+          const isPresente = presencas[item.id] === true;
+
+          return (
+            <RegistroAlunoCard
+              styles={styles}
+              item={item}
+              isEditMode={isEditMode}
+              isPresente={isPresente}
+              statusConhecido={statusConhecido}
+              onToggle={() => togglePresenca(item.id)}
+            />
+          );
+        }}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={<Text style={styles.emptyText}>Nenhum aluno encontrado.</Text>}
       />
@@ -324,5 +293,7 @@ export default function RegistroPresenca() {
     </SafeAreaView>
   );
 }
+
+
 
 

@@ -1,5 +1,7 @@
-﻿import { StyleSheet } from 'react-native';
-import { colors } from '../../constants/colors';
+﻿import { StyleSheet, Dimensions } from 'react-native';
+import { colors } from '../../global/colors';
+
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },

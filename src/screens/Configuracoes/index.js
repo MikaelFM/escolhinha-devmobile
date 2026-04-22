@@ -8,55 +8,17 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import InputField from '../../components/InputField';
 import { maskApenasNumeros, maskData } from '../../utils/masks';
+import {
+  formatarIsoParaBr,
+  formatarBrParaIsoCurta,
+  normalizarValorMonetario,
+  monetarioParaNumero,
+} from '../../utils/formatters';
 import { ajustesService } from '../../services/ajustesService';
 import styles from './styles';
-
-const formatarIsoParaBr = (valor) => {
-  if (!valor) return '';
-
-  const texto = String(valor).trim();
-  const isoMatch = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
-
-  if (isoMatch) {
-    return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
-  }
-
-  const data = new Date(texto);
-  if (!Number.isNaN(data.getTime())) {
-    const dia = String(data.getDate()).padStart(2, '0');
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const ano = data.getFullYear();
-    return `${dia}/${mes}/${ano}`;
-  }
-
-  return texto;
-};
-
-const formatarBrParaIsoCurta = (valor) => {
-  const [dia, mes, ano] = String(valor || '').split('/');
-
-  if (!dia || !mes || !ano) {
-    return '';
-  }
-
-  return `${ano}-${mes}-${dia}`;
-};
-
-const normalizarValorMonetario = (valor) => {
-  if (valor === null || valor === undefined || valor === '') {
-    return '';
-  }
-
-  return String(valor).replace('.', ',');
-};
-
-const monetarioParaNumero = (valor) => {
-  const numero = Number(String(valor || '').replace(',', '.'));
-  return Number.isFinite(numero) ? numero : NaN;
-};
 
 export default function ConfiguracoesSistema() {
   const [form, setForm] = useState({
@@ -105,17 +67,17 @@ export default function ConfiguracoesSistema() {
     const dataFimIso = formatarBrParaIsoCurta(form.dataFimAulas);
 
     if (!Number.isInteger(diaFechamentoNumero) || diaFechamentoNumero < 1 || diaFechamentoNumero > 31) {
-      Alert.alert('AtenÃ§Ã£o', 'Informe um dia de fechamento vÃ¡lido entre 1 e 31.');
+      Alert.alert('Atenção', 'Informe um dia de fechamento válido entre 1 e 31.');
       return;
     }
 
     if (!Number.isFinite(valorMensalidadeNumero) || valorMensalidadeNumero < 0) {
-      Alert.alert('AtenÃ§Ã£o', 'Informe um valor de mensalidade vÃ¡lido.');
+      Alert.alert('Atenção', 'Informe um valor de mensalidade válido.');
       return;
     }
 
     if (!dataInicioIso || !dataFimIso) {
-      Alert.alert('AtenÃ§Ã£o', 'Informe as datas de inÃ­cio e fim do perÃ­odo letivo.');
+      Alert.alert('Atenção', 'Informe as datas de início e fim do período letivo.');
       return;
     }
 
@@ -133,7 +95,7 @@ export default function ConfiguracoesSistema() {
       setTimeout(() => setSucesso(false), 3000);
     } catch (error) {
       console.log('Erro ao salvar ajustes:', error);
-      Alert.alert('Erro', error?.message || 'NÃ£o foi possÃ­vel salvar os ajustes.');
+      Alert.alert('Erro', error?.message || 'Não foi possível salvar os ajustes.');
     } finally {
       setSaving(false);
     }
@@ -153,15 +115,15 @@ export default function ConfiguracoesSistema() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         
         <View style={styles.header}>
-          <Text style={styles.titulo}>ConfiguraÃ§Ãµes</Text>
-          <Text style={styles.subtitulo}>Ajuste as regras de negÃ³cio e financeiro</Text>
+          <Text style={styles.titulo}>Configurações</Text>
+          <Text style={styles.subtitulo}>Ajuste as regras de negócio e financeiro</Text>
         </View>
 
         {/* Card de Resumo das Regras Atuais */}
         {/* <View style={styles.cardRegras}>
-          <Text style={styles.cardRegrasTitulo}>Resumo de CobranÃ§a</Text>
+          <Text style={styles.cardRegrasTitulo}>Resumo de Cobrança</Text>
           <Text style={styles.cardRegrasTexto}>
-            As mensalidades de <Text style={styles.negrito}>R$ {form.valorMensalidade}</Text> serÃ£o geradas todo dia <Text style={styles.negrito}>{form.diaFechamento}</Text> de cada mÃªs.
+            As mensalidades de <Text style={styles.negrito}>R$ {form.valorMensalidade}</Text> serão geradas todo dia <Text style={styles.negrito}>{form.diaFechamento}</Text> de cada mês.
           </Text>
         </View> */}
 
@@ -169,7 +131,7 @@ export default function ConfiguracoesSistema() {
           {/* <Text style={styles.secaoTitulo}>Financeiro</Text> */}
           
           <InputField
-            label="Dia de fechamento do mÃªs"
+            label="Dia de fechamento do mês"
             placeholder="Ex: 05"
             value={form.diaFechamento}
             onChangeText={(v) => setForm({...form, diaFechamento: v})}
@@ -186,7 +148,7 @@ export default function ConfiguracoesSistema() {
           />
 
           <InputField
-            label="InÃ­cio perÃ­odo letivo"
+            label="Início período letivo"
             placeholder="DD/MM/AAAA"
             value={form.dataInicioAulas}
             onChangeText={(v) => setForm({...form, dataInicioAulas: maskData(v)})}
@@ -194,7 +156,7 @@ export default function ConfiguracoesSistema() {
           />
 
           <InputField
-            label="Fim perÃ­odo letivo"
+            label="Fim período letivo"
             placeholder="DD/MM/AAAA"
             value={form.dataFimAulas}
             onChangeText={(v) => setForm({...form, dataFimAulas: maskData(v)})}
@@ -204,12 +166,12 @@ export default function ConfiguracoesSistema() {
 
         {sucesso && (
           <View style={styles.sucessoBox}>
-            <Text style={styles.sucessoTexto}>âœ“ ConfiguraÃ§Ãµes salvas!</Text>
+            <Text style={styles.sucessoTexto}>✓ Configurações salvas!</Text>
           </View>
         )}
 
         <TouchableOpacity style={[styles.botaoSalvar, saving && styles.botaoSalvarDesabilitado]} onPress={handleSalvar} disabled={saving}>
-          <Text style={styles.botaoSalvarTexto}>{saving ? 'Salvando...' : 'Atualizar ConfiguraÃ§Ãµes'}</Text>
+          <Text style={styles.botaoSalvarTexto}>{saving ? 'Salvando...' : 'Atualizar Configurações'}</Text>
         </TouchableOpacity>
 
       </ScrollView>

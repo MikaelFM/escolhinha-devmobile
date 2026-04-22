@@ -11,11 +11,12 @@ import {
   ActivityIndicator
 } from 'react-native';
 
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import { useNavigation } from '@react-navigation/native';
 import { alunosService } from '../../services';
 import { categoriasService } from '../../services/categoriasService';
 import { Ionicons } from '@expo/vector-icons';
+import AlunoListCard from '../../components/AlunoListCard';
 import styles from './styles';
 
 const ITENS_POR_PAGINA = 5;
@@ -235,51 +236,6 @@ export default function ListaAlunos() {
     return categoria?.nome_categoria || 'Sem categoria';
   };
 
-  const renderCardAluno = ({ item }) => {
-    const nomeAluno = item?.nome || 'Aluno sem nome';
-    const emDia = Number(item?.mensalidade ?? 0) === 0;
-    const categoriaAluno = getCategoriaNome(item);
-    const responsavel = item?.nome_responsavel;
-    const frequencia = Number(item?.frequencia ?? 0);
-    const faltas = Number(item?.faltas ?? 0);
-
-    return (
-      <TouchableOpacity 
-        style={styles.card} 
-        onPress={() => navigation.navigate('fichaAluno', { rg: item?.rg_aluno || item?.rg })}
-      >
-        <View style={styles.cardHeader}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarTexto}>{nomeAluno.substring(0, 2).toUpperCase()}</Text>
-          </View>
-          <View style={styles.infoPrincipal}>
-            <Text style={styles.nomeAluno}>{nomeAluno}</Text>
-            <Text style={styles.categoriaTexto}>
-              {categoriaAluno} â€¢ {responsavel || 'Sem responsÃ¡vel'}
-            </Text>
-          </View>
-          <View style={[styles.statusBadge, { backgroundColor: emDia ? '#f0fdf4' : '#fef2f2' }]}>
-            <Text style={[styles.statusTexto, { color: emDia ? '#16a34a' : '#dc2626' }]}>
-               {emDia ? 'EM DIA' : 'ATRASO'}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.cardFooter}>
-          <View style={styles.statItem}>
-            <Ionicons name="calendar-outline" size={14} color="#94a3b8" />
-            <Text style={styles.statTexto}>{Math.round(frequencia)}% FrequÃªncia</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Ionicons name="alert-circle-outline" size={14} color="#94a3b8" />
-            <Text style={styles.statTexto}>{faltas} Faltas</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color="#cbd5e1" style={{marginLeft: 'auto'}} />
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -360,7 +316,27 @@ export default function ListaAlunos() {
           <FlatList
             data={alunos}
             keyExtractor={(item, index) => String(item?.rg_aluno || item?.rg || index) + '-' + index}
-            renderItem={renderCardAluno}
+            renderItem={({ item }) => {
+              const nomeAluno = item?.nome || 'Aluno sem nome';
+              const emDia = Number(item?.mensalidade ?? 0) === 0;
+              const categoriaAluno = getCategoriaNome(item);
+              const responsavel = item?.nome_responsavel;
+              const frequencia = Number(item?.frequencia ?? 0);
+              const faltas = Number(item?.faltas ?? 0);
+
+              return (
+                <AlunoListCard
+                  styles={styles}
+                  nomeAluno={nomeAluno}
+                  categoriaAluno={categoriaAluno}
+                  responsavel={responsavel}
+                  emDia={emDia}
+                  frequencia={frequencia}
+                  faltas={faltas}
+                  onPress={() => navigation.navigate('fichaAluno', { rg: item?.rg_aluno || item?.rg })}
+                />
+              );
+            }}
             contentContainerStyle={styles.lista}
             showsVerticalScrollIndicator={false}
             onEndReached={handleCarregarMais}
@@ -385,5 +361,7 @@ export default function ListaAlunos() {
     </SafeAreaView>
   );
 }
+
+
 
 

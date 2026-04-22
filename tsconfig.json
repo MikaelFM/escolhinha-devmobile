@@ -4,6 +4,7 @@
     "jsx": "react-native",
     "skipLibCheck": true,
     "allowJs": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "noEmit": true
   }
 }

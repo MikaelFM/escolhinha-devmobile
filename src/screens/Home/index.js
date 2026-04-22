@@ -1,5 +1,5 @@
 ﻿import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 
 import Dashboard from '../Dashboard';
 import ListaAlunos from '../ListAlunos';

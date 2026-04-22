@@ -4,38 +4,18 @@ import {
   Text,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator
 } from 'react-native';
-import { colors } from '../../constants/colors';
+import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { presencaService } from '../../services/presencaService';
 import { useAuth } from '../../contexts/AuthContext';
+import { formatarDataBR } from '../../utils/formatters';
+import PresencaItemCard from '../../components/PresencaItemCard';
 import styles from './styles';
 
 const VERDE = '#16a34a';
 const VERMELHO = '#dc2626';
-
-const formatarDataBR = (valor) => {
-  if (!valor) return 'N/A';
-
-  const texto = String(valor).trim();
-  const isoMatch = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
-
-  if (isoMatch) {
-    return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
-  }
-
-  const data = new Date(texto);
-  if (!Number.isNaN(data.getTime())) {
-    const dia = String(data.getDate()).padStart(2, '0');
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const ano = data.getFullYear();
-    return `${dia}/${mes}/${ano}`;
-  }
-
-  return texto;
-};
 
 const obterDiaSemana = (valor) => {
   const data = new Date(valor);
@@ -63,7 +43,7 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
 
         if (!rgAluno) {
           setHistorico([]);
-          setError('RG nÃ£o informado');
+          setError('RG não informado');
           return;
         }
 
@@ -78,7 +58,7 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
 
             return {
               id: String(item?.id ?? `${rgAluno}-${index}`),
-              data: formatarDataBR(dataISO),
+              data: formatarDataBR(dataISO, 'N/A'),
               diaSemana: obterDiaSemana(dataISO),
               status: presente ? 'Presente' : 'Falta',
             };
@@ -91,8 +71,8 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
 
         setHistorico(historicoFormatado);
       } catch (err) {
-        console.log('Erro ao carregar histÃ³rico de presenÃ§a:', err);
-        setError(err?.message || 'Erro ao carregar histÃ³rico de presenÃ§a');
+        console.log('Erro ao carregar histórico de presença:', err);
+        setError(err?.message || 'Erro ao carregar histórico de presença');
         setHistorico([]);
       } finally {
         setLoading(false);
@@ -109,37 +89,11 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
     return { presencas, faltas: total - presencas, porcentagem };
   }, [historico]);
 
-  const PresencaItem = ({ item }) => {
-    const isPresente = item.status === 'Presente';
-
-    return (
-      <View style={[styles.cardPresenca, !isPresente && styles.cardFalta]}>
-        <View style={[styles.iconWrapper, { backgroundColor: isPresente ? '#f0fdf4' : '#fef2f2' }]}>
-          <Ionicons
-            name={isPresente ? 'checkmark-circle-outline' : 'close-circle-outline'}
-            size={24}
-            color={isPresente ? VERDE : VERMELHO}
-          />
-        </View>
-
-        <View style={{ flex: 1, marginLeft: 15 }}>
-          <Text style={styles.dataTitulo}>{item.data} â€¢ {item.diaSemana}</Text>
-        </View>
-
-        <View style={[styles.statusBadge, { backgroundColor: isPresente ? '#f0fdf4' : '#fef2f2' }]}>
-          <Text style={[styles.statusTexto, { color: isPresente ? VERDE : VERMELHO }]}>
-            {item.status.toUpperCase()}
-          </Text>
-        </View>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.header}>
-          <Text style={styles.titulo}>FrequÃªncia</Text>
+          <Text style={styles.titulo}>Frequência</Text>
           <Text style={styles.subtitulo}>Acompanhe sua assiduidade nos treinos</Text>
         </View>
 
@@ -156,13 +110,13 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
         </View>
 
         <View style={styles.bottomSheet}>
-          <Text style={styles.secaoTitulo}>HISTÃ“RICO DE AULAS</Text>
+          <Text style={styles.secaoTitulo}>HISTÓRICO DE AULAS</Text>
 
           <View style={styles.listaContainer}>
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size='large' color={colors.primary} />
-                <Text style={styles.loadingText}>Carregando histÃ³rico...</Text>
+                <Text style={styles.loadingText}>Carregando histórico...</Text>
               </View>
             ) : error ? (
               <View style={styles.errorContainer}>
@@ -170,7 +124,15 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : historico.length > 0 ? (
-              historico.map((item) => <PresencaItem key={item.id} item={item} />)
+              historico.map((item) => (
+                <PresencaItemCard
+                  key={item.id}
+                  styles={styles}
+                  item={item}
+                  verde={VERDE}
+                  vermelho={VERMELHO}
+                />
+              ))
             ) : (
               <Text style={styles.vazioTexto}>Nenhum registro</Text>
             )}
@@ -179,7 +141,7 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
           <View style={styles.infoFooter}>
             <Ionicons name='information-circle-outline' size={16} color={colors.textPlaceholder} />
             <Text style={styles.infoFooterTexto}>
-              Em caso de divergÃªncia na frequÃªncia, entre em contato com a secretaria da escolinha.
+              Em caso de divergência na frequência, entre em contato com a secretaria da escolinha.
             </Text>
           </View>
         </View>
@@ -187,5 +149,7 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
     </SafeAreaView>
   );
 }
+
+
 
 
