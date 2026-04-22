@@ -69,7 +69,7 @@ export default function Routes () {
       <Stack.Screen
         name="cadastroAluno"
         component={CadastroAluno}
-        options={{ ...headerComVoltar, headerTitle: 'Cadastro de Aluno' }}
+        options={{ ...headerComVoltar, headerTitle: '' }}
       />
       <Stack.Screen
         name="alteracaoSenha"

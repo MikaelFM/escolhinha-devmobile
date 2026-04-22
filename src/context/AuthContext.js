@@ -110,6 +110,30 @@ export const AuthProvider = ({ children }) => {
         }
       },
 
+      signInBiometria: async () => {
+        try {
+          const resposta = await authService.loginBiometria();
+
+          dispatch({
+            type: 'SIGN_IN',
+            payload: {
+              token: resposta.token,
+              userData: resposta.user,
+            },
+          });
+
+          return {
+            sucesso: true,
+            mensagem: 'Login biométrico realizado com sucesso!',
+          };
+        } catch (erro) {
+          return {
+            sucesso: false,
+            mensagem: erro.message || 'Erro ao fazer login biométrico',
+          };
+        }
+      },
+
       signUp: async (email, nome, senha, confirmSenha) => {
         try {
           if (senha !== confirmSenha) {

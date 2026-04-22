@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
+  ActivityIndicator
 } from 'react-native';
 import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
 import InputField from '../../components/InputField';
 import { authService } from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
+import styles from './styles';
 
 export default function AlteracaoSenha({ navigation }) {
   const [senhaAtual, setSenhaAtual] = useState('');
@@ -33,11 +33,11 @@ export default function AlteracaoSenha({ navigation }) {
     return {
       valida: temMaipuscula && temMinuscula && temNumero && !temEspacoOuCaractereEspecial && senha.length >= 8,
       erros: [
-        !temMaipuscula ? 'Mínimo 1 letra maiúscula' : null,
-        !temMinuscula ? 'Mínimo 1 letra minúscula' : null,
-        !temNumero ? 'Mínimo 1 número' : null,
-        temEspacoOuCaractereEspecial ? 'Sem espaços em branco' : null,
-        senha.length < 8 ? 'Mínimo 8 caracteres' : null,
+        !temMaipuscula ? 'MÃ­nimo 1 letra maiÃºscula' : null,
+        !temMinuscula ? 'MÃ­nimo 1 letra minÃºscula' : null,
+        !temNumero ? 'MÃ­nimo 1 nÃºmero' : null,
+        temEspacoOuCaractereEspecial ? 'Sem espaÃ§os em branco' : null,
+        senha.length < 8 ? 'MÃ­nimo 8 caracteres' : null,
       ].filter(Boolean),
     };
   };
@@ -65,11 +65,11 @@ export default function AlteracaoSenha({ navigation }) {
     }
 
     if (senhaNova && senhaNovaConfirm && senhaNova !== senhaNovaConfirm) {
-      novosErros.senhaNovaConfirm = 'As senhas não coincidem';
+      novosErros.senhaNovaConfirm = 'As senhas nÃ£o coincidem';
     }
 
     if (senhaAtual && senhaNova && senhaAtual === senhaNova) {
-      novosErros.senhaNova = 'Não pode ser igual à senha atual';
+      novosErros.senhaNova = 'NÃ£o pode ser igual Ã  senha atual';
     }
 
     const validacao = validarSenha(senhaNova);
@@ -175,7 +175,7 @@ export default function AlteracaoSenha({ navigation }) {
 
           {sucesso && (
             <View style={styles.sucessoBox}>
-              <Text style={styles.sucessoTexto}>✓ Senha alterada com sucesso!</Text>
+              <Text style={styles.sucessoTexto}>âœ“ Senha alterada com sucesso!</Text>
             </View>
           )}
 
@@ -193,115 +193,3 @@ export default function AlteracaoSenha({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 15,
-    paddingVertical: 30,
-  },
-  scroll: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  navBar: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 15,
-    paddingVertical: 50,
-  },
-  scroll: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    paddingTop: 12,
-  },
-  navBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 50,
-  },
-  iconeTexto: {
-    fontSize: 28,
-  },
-  titulo: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: 0.3,
-    marginBottom: 4,
-  },
-  subtitulo: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '400',
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 15,
-    paddingVertical: 24,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  requisitosCard: {
-    backgroundColor: '#f8fafc',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginVertical: 12,
-  },
-  requisitosTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.primary,
-    marginBottom: 8,
-  },
-  requisito: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginVertical: 4,
-  },
-  requisitoTexto: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  sucessoBox: {
-    backgroundColor: '#f0fdf4',
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 16,
-    alignItems: 'center',
-  },
-  sucessoTexto: {
-    color: '#16a34a',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  botaoSalvar: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  botaoSalvarTexto: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-});

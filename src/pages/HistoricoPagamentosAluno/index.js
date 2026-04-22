@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
@@ -10,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
-  Image,
+  Image
 } from 'react-native';
 import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +17,7 @@ import { mensalidadesService } from '../../services/mensalidadesService';
 import { cobrancaService } from '../../services/cobrancaService';
 import { useAuth } from '../../context/AuthContext';
 import { formatarDataBR, formatarMesAno } from '../../utils/formatters';
+import styles from './styles';
 
 const VERDE = '#16a34a';
 const VERMELHO = '#dc2626';
@@ -42,7 +42,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
 
         if (!rgAluno) {
           setMensalidades([]);
-          setError('RG não informado');
+          setError('RG nÃ£o informado');
           return;
         }
 
@@ -79,7 +79,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
 
   const handleCopiarPix = (codigo) => {
     Clipboard.setString(codigo);
-    Alert.alert('Pix Copiado!', 'O código Copia e Cola foi copiado para sua área de transferência.');
+    Alert.alert('Pix Copiado!', 'O cÃ³digo Copia e Cola foi copiado para sua Ã¡rea de transferÃªncia.');
   };
 
   const handleGerarCobrancaPix = async (idMensalidade) => {
@@ -93,11 +93,11 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
         setPixData({ link, qr_code_img });
         setPixModalVisible(true);
       } else {
-        Alert.alert('Erro', 'Não foi possível gerar o QR code');
+        Alert.alert('Erro', 'NÃ£o foi possÃ­vel gerar o QR code');
       }
     } catch (err) {
-      console.log('Erro ao gerar cobrança PIX:', err);
-      Alert.alert('Erro', err?.message || 'Erro ao gerar cobrança PIX');
+      console.log('Erro ao gerar cobranÃ§a PIX:', err);
+      Alert.alert('Erro', err?.message || 'Erro ao gerar cobranÃ§a PIX');
     } finally {
       setPixLoading(false);
     }
@@ -126,7 +126,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
         <View style={{ flex: 1, marginLeft: 15 }}>
           <Text style={styles.mesTitulo}>{item.mes}</Text>
           <Text style={styles.valorSubtitulo}>
-            {item.valor} • {isPago ? `Pago em ${item.dataPagamento}` : 'Em aberto'}
+            {item.valor} â€¢ {isPago ? `Pago em ${item.dataPagamento}` : 'Em aberto'}
           </Text>
           {item.pagoViaPix && <Text style={styles.pixInfo}>Pago via PIX</Text>}
         </View>
@@ -161,7 +161,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
             <Ionicons name='chevron-back' size={28} color={colors.primary} />
           </TouchableOpacity>
           <Text style={styles.titulo}>Mensalidades</Text>
-          <Text style={styles.subtitulo}>Histórico de pagamentos e cobranças</Text>
+          <Text style={styles.subtitulo}>HistÃ³rico de pagamentos e cobranÃ§as</Text>
         </View>
 
         <View style={styles.resumoCard}>
@@ -177,7 +177,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
         </View>
 
         <View style={styles.bottomSheet}>
-          <Text style={styles.secaoTitulo}>HISTÓRICO RECENTE</Text>
+          <Text style={styles.secaoTitulo}>HISTÃ“RICO RECENTE</Text>
 
           <View style={styles.listaContainer}>
             {loading ? (
@@ -200,7 +200,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
           <View style={styles.infoFooter}>
             <Ionicons name='shield-checkmark-outline' size={16} color={colors.textPlaceholder} />
             <Text style={styles.infoFooterTexto}>
-              Pagamentos via PIX são baixados automaticamente em até 30 minutos.
+              Pagamentos via PIX sÃ£o baixados automaticamente em atÃ© 30 minutos.
             </Text>
           </View>
         </View>
@@ -222,7 +222,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
               <Ionicons name='close' size={24} color={colors.primary} />
             </TouchableOpacity>
 
-            <Text style={styles.modalTitulo}>Código QR - PIX</Text>
+            <Text style={styles.modalTitulo}>CÃ³digo QR - PIX</Text>
 
             {pixData.qr_code_img && (
               <View style={styles.qrCodeContainer}>
@@ -233,7 +233,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
               </View>
             )}
 
-            <Text style={styles.modalSubtitulo}>Ou copie o código PIX Copia e Cola:</Text>
+            <Text style={styles.modalSubtitulo}>Ou copie o cÃ³digo PIX Copia e Cola:</Text>
 
             <View style={styles.linkContainer}>
               <Text style={styles.linkTexto} numberOfLines={3}>
@@ -262,189 +262,3 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  bottomSheet: {
-    backgroundColor: colors.background,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    marginTop: 8,
-    paddingTop: 12,
-    paddingBottom: 24,
-    shadowColor: colors.textPlaceholder,
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: -8 },
-    elevation: 20,
-  },
-  header: { paddingHorizontal: 20, paddingTop: 60, marginBottom: 20 },
-  backBtn: { marginLeft: -10, marginBottom: 10 },
-  titulo: { fontSize: 32, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 },
-  subtitulo: { fontSize: 14, color: colors.textPlaceholder, marginTop: 4 },
-
-  resumoCard: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    padding: 20,
-    backgroundColor: '#f8fafc',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 25,
-  },
-  resumoItem: { flex: 1, alignItems: 'center' },
-  resumoLabel: { fontSize: 9, fontWeight: '900', color: colors.textPlaceholder, letterSpacing: 1, marginBottom: 5 },
-  resumoValor: { fontSize: 16, fontWeight: '800', color: colors.primary },
-  divisor: { width: 1, backgroundColor: '#e2e8f0', height: '100%' },
-
-  secaoTitulo: {
-    fontSize: 11, fontWeight: '900', color: colors.textPlaceholder,
-    marginLeft: 20, marginBottom: 15, letterSpacing: 1,
-  },
-
-  listaContainer: { marginHorizontal: 20 },
-  cardMensalidade: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  cardPendente: {
-    backgroundColor: '#fffcf9',
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    borderBottomWidth: 0,
-    marginBottom: 10,
-  },
-  iconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mesTitulo: { fontSize: 16, fontWeight: '700', color: colors.primary },
-  valorSubtitulo: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-  pixInfo: { fontSize: 11, fontWeight: '700', color: '#0f766e', marginTop: 3 },
-
-  btnPix: {
-    backgroundColor: colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    gap: 5,
-  },
-  btnPixTexto: { color: '#fff', fontSize: 11, fontWeight: '800' },
-
-  badgePago: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    backgroundColor: '#f0fdf4',
-  },
-  badgePagoTexto: { fontSize: 10, fontWeight: '900', color: VERDE },
-
-  loadingContainer: { paddingVertical: 25, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { marginTop: 10, color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
-  errorContainer: { paddingVertical: 25, alignItems: 'center', justifyContent: 'center' },
-  errorText: { marginTop: 10, color: VERMELHO, fontSize: 13, fontWeight: '600', textAlign: 'center' },
-  vazioTexto: { color: colors.textPlaceholder, fontSize: 13, fontWeight: '600', paddingVertical: 12 },
-
-  infoFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 30,
-    marginTop: 30,
-    gap: 8,
-    opacity: 0.7,
-  },
-  infoFooterTexto: { fontSize: 11, color: colors.textSecondary, flex: 1, lineHeight: 16 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 30,
-    width: '85%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalCloseBtn: {
-    position: 'absolute',
-    right: 15,
-    top: 15,
-    zIndex: 10,
-  },
-  modalTitulo: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: colors.primary,
-    marginBottom: 20,
-    marginTop: 10,
-  },
-  qrCodeContainer: {
-    backgroundColor: colors.backgroundSecondary,
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 20,
-  },
-  qrCodeImage: {
-    width: 220,
-    height: 220,
-  },
-  modalSubtitulo: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#64748b',
-    marginBottom: 12,
-  },
-  linkContainer: {
-    backgroundColor: '#f0f9ff',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-  linkTexto: {
-    flex: 1,
-    fontSize: 11,
-    color: colors.primary,
-    fontWeight: '600',
-    fontFamily: 'monospace',
-  },
-  btnCopiarLink: {
-    backgroundColor: colors.primary,
-    padding: 10,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  btnFechar: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 10,
-    width: '100%',
-    alignItems: 'center',
-  },
-  btnFecharTexto: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '800',
-  },
-});

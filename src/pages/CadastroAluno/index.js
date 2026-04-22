@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
-  Platform,
+  Platform
 } from 'react-native';
 
 import { maskApenasNumeros, maskCPF, maskData, maskTelefone } from '../../utils/masks';
@@ -19,6 +18,7 @@ import { alunosService } from '../../services';
 import { categoriasService } from '../../services/categoriasService';
 import { responsavelService } from '../../services/responsavelService';
 import { normalizarTexto } from '../../utils/formatters';
+import styles from './styles';
 
 const FORM_INICIAL = {
   nome: '',
@@ -67,7 +67,7 @@ export default function CadastroAluno({ navigation, route }) {
         const aluno = response?.data ?? response;
 
         if (!aluno) {
-          throw new Error('Aluno não encontrado.');
+          throw new Error('Aluno nÃ£o encontrado.');
         }
 
         setForm({
@@ -84,7 +84,7 @@ export default function CadastroAluno({ navigation, route }) {
 
         setRgOriginal(normalizarTexto(aluno.rg_aluno || aluno.rg || idDaRota));
       } catch (erro) {
-        console.log('Erro ao carregar aluno para edição:', erro);
+        console.log('Erro ao carregar aluno para ediÃ§Ã£o:', erro);
       } finally {
         setCarregandoAluno(false);
       }
@@ -120,8 +120,8 @@ export default function CadastroAluno({ navigation, route }) {
 
   const validar = () => {
     const novosErros = {
-      nome: validaObrigatorio(form.nome, 'Nome é obrigatório.'),
-      rg: validaObrigatorio(form.rg, 'RG é obrigatório.'),
+      nome: validaObrigatorio(form.nome, 'Nome Ã© obrigatÃ³rio.'),
+      rg: validaObrigatorio(form.rg, 'RG Ã© obrigatÃ³rio.'),
       telefone: validaTelefone(form.telefone),
       cpf_responsavel: form.cpf_responsavel ? validaCPF(form.cpf_responsavel) : '',
       nome_responsavel: '',
@@ -203,11 +203,18 @@ export default function CadastroAluno({ navigation, route }) {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
+          <View style={styles.topHeader}>
+            <Text style={styles.titulo}>{modoEdicao ? 'Editar Aluno' : 'Cadastrar Aluno'}</Text>
+            <Text style={styles.subtitulo}>
+              {modoEdicao ? 'Atualize os dados do aluno.' : 'Cadastre um novo aluno.'}
+            </Text>
+          </View>
+
           <View>
             <InputField
               label="Nome completo"
               obrigatorio
-              placeholder="Ex: João da Silva"
+              placeholder="Ex: JoÃ£o da Silva"
               value={form.nome}
               onChangeText={v => setField('nome', v)}
               erro={erros.nome}
@@ -249,7 +256,7 @@ export default function CadastroAluno({ navigation, route }) {
             />
 
             <InputField
-              label="CPF do responsável"
+              label="CPF do responsÃ¡vel"
               placeholder="000.000.000-00"
               value={form.cpf_responsavel}
               onChangeText={v => onChangeCpfResponsavel(v)}
@@ -261,7 +268,7 @@ export default function CadastroAluno({ navigation, route }) {
             {possuiCpf_responsavel && (
               <>
                 <InputField
-                  label="Nome do responsável"
+                  label="Nome do responsÃ¡vel"
                   placeholder="Ex: Maria da Silva"
                   value={form.nome_responsavel}
                   onChangeText={v => setField('nome_responsavel', v)}
@@ -270,7 +277,7 @@ export default function CadastroAluno({ navigation, route }) {
                 />
 
                 <InputField
-                  label="Telefone do responsável"
+                  label="Telefone do responsÃ¡vel"
                   placeholder="(54) 98182-0000"
                   value={form.telefone_responsavel}
                   onChangeText={v => setField('telefone_responsavel', v)}
@@ -295,7 +302,7 @@ export default function CadastroAluno({ navigation, route }) {
             {sucesso && (
               <View style={styles.sucessoBox}>
                 <Text style={styles.sucessoTexto}>
-                  {modoEdicao ? '✓ Aluno atualizado com sucesso!' : '✓ Aluno cadastrado com sucesso!'}
+                  {modoEdicao ? 'âœ“ Aluno atualizado com sucesso!' : 'âœ“ Aluno cadastrado com sucesso!'}
                 </Text>
               </View>
             )}
@@ -306,7 +313,7 @@ export default function CadastroAluno({ navigation, route }) {
               onPress={handleSalvar}
               disabled={carregandoAluno}
             >
-              <Text style={styles.botaoSalvarTexto}>{modoEdicao ? 'Salvar alterações' : 'Salvar'}</Text>
+              <Text style={styles.botaoSalvarTexto}>{modoEdicao ? 'Salvar alteraÃ§Ãµes' : 'Salvar'}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -316,159 +323,3 @@ export default function CadastroAluno({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 15,
-    paddingVertical: 30,
-  },
-  scroll: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  navBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  navBotaoVoltar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    backgroundColor: colors.primaryLight,
-    borderWidth: 1.5,
-    borderColor: colors.primaryBorder,
-  },
-  navTextoVoltar: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 50,
-  },
-  iconeBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  iconeTexto: {
-    fontSize: 28,
-  },
-  titulo: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: 0.3,
-    marginBottom: 4,
-  },
-  subtitulo: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    fontWeight: '400',
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 15,
-    paddingVertical: 24,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  sucessoBox: {
-    backgroundColor: '#f0fdf4',
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 16,
-    alignItems: 'center',
-  },
-  sucessoTexto: {
-    color: '#16a34a',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  botaoSalvar: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  botaoSalvarTexto: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  modalBox: {
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 20,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
-    maxHeight: '60%',
-  },
-  modalTitulo: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  modalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-  },
-  modalItemAtivo: {
-    backgroundColor: colors.primaryBorder,
-  },
-  modalItemTexto: {
-    fontSize: 15,
-    color: '#334155',
-    fontWeight: '500',
-  },
-  modalItemTextoAtivo: {
-    color: colors.primary,
-    fontWeight: '700',
-  },
-  modalCheck: {
-    fontSize: 16,
-    color: colors.primary,
-    fontWeight: '700',
-  },
-  separador: {
-    height: 1,
-    backgroundColor: '#f1f5f9',
-  },
-});

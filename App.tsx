@@ -2,10 +2,10 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import Routes from './src/routes';
-import RoutesAluno from './src/routes_aluno';
-import Login from './src/pages/Login';
-import { AuthProvider, useAuth } from './src/context/AuthContext';
+import Routes from './src/navigation/routes';
+import RoutesAluno from './src/navigation/routes_aluno';
+import Login from './src/screens/Login';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 const Stack = createStackNavigator();
 

@@ -72,6 +72,54 @@ export const formatarMoedaBR = (valor?: string | number | null): string => {
   }).format(seguro);
 };
 
+export const formatarIsoParaBr = (valor?: string | number | null): string => {
+  if (!valor) {
+    return '';
+  }
+
+  const texto = String(valor).trim();
+  const isoMatch = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (isoMatch) {
+    return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+  }
+
+  const data = new Date(texto);
+  if (!Number.isNaN(data.getTime())) {
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const ano = data.getFullYear();
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  return texto;
+};
+
+export const formatarBrParaIsoCurta = (valor?: string | null): string => {
+  const [dia, mes, ano] = String(valor || '').split('/');
+
+  if (!dia || !mes || !ano) {
+    return '';
+  }
+
+  return `${ano}-${mes}-${dia}`;
+};
+
+export const normalizarValorMonetario = (
+  valor?: string | number | null
+): string => {
+  if (valor === null || valor === undefined || valor === '') {
+    return '';
+  }
+
+  return String(valor).replace('.', ',');
+};
+
+export const monetarioParaNumero = (valor?: string | number | null): number => {
+  const numero = Number(String(valor || '').replace(',', '.'));
+  return Number.isFinite(numero) ? numero : NaN;
+};
+
 export const obterChaveMes = (mes: number, ano: number): string => {
   return `${ano}-${String(mes).padStart(2, '0')}`;
 };

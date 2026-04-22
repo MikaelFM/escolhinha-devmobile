@@ -1,26 +1,59 @@
-import { useState } from 'react';
+﻿import {
+  useEffect,
+  useRef,
+  useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
-  StyleSheet,
   SafeAreaView,
   ActivityIndicator,
-  Alert,
+  Alert
 } from 'react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 import InputField from '../../components/InputField';
 import { colors } from '../../global/colors';
 import { useAuth } from '../../context/AuthContext';
+import { tokenService } from '../../services/tokenService';
+import styles from './styles';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [carregandoBiometria, setCarregandoBiometria] = useState(false);
+  const [biometriaDisponivel, setBiometriaDisponivel] = useState(false);
+  const tentativaAutomaticaBiometriaRef = useRef(false);
   
-  const { signIn } = useAuth();
+  const { signIn, signInBiometria } = useAuth();
+
+  useEffect(() => {
+    const verificarBiometriaDisponivel = async () => {
+      try {
+        const [hasHardware, isEnrolled, temBiometriaAtiva, preferenciaBiometria] = await Promise.all([
+          LocalAuthentication.hasHardwareAsync(),
+          LocalAuthentication.isEnrolledAsync(),
+          tokenService.temBiometriaAtiva(),
+          tokenService.obterPreferenciaBiometria(),
+        ]);
+
+        setBiometriaDisponivel(hasHardware && isEnrolled && temBiometriaAtiva && preferenciaBiometria);
+      } catch (e) {
+        setBiometriaDisponivel(false);
+      }
+    };
+
+    verificarBiometriaDisponivel();
+  }, []);
+
+  useEffect(() => {
+    if (biometriaDisponivel && !tentativaAutomaticaBiometriaRef.current) {
+      tentativaAutomaticaBiometriaRef.current = true;
+      handleEntrarComBiometria();
+    }
+  }, [biometriaDisponivel]);
 
   const handleEntrar = async () => {
     setErro('');
@@ -51,6 +84,33 @@ export default function Login() {
       'Recuperar Senha',
       'Funcionalidade em desenvolvimento'
     );
+  };
+
+  const handleEntrarComBiometria = async () => {
+    setErro('');
+    setCarregandoBiometria(true);
+
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Entrar com biometria',
+        fallbackLabel: 'Usar senha',
+        cancelLabel: 'Cancelar',
+        disableDeviceFallback: false,
+      });
+
+      if (!result.success) {
+        return;
+      }
+
+      const resultado = await signInBiometria();
+      if (!resultado.sucesso) {
+        setErro(resultado.mensagem);
+      }
+    } catch (error) {
+      setErro('NÃ£o foi possÃ­vel autenticar com biometria.');
+    } finally {
+      setCarregandoBiometria(false);
+    }
   };
 
   return (
@@ -120,75 +180,3 @@ export default function Login() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 28,
-    justifyContent: 'center',
-  },
-  header: {
-    marginBottom: 36,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 45,
-    fontWeight: '700',
-    color: colors.primary,
-    marginBottom: 40,
-    letterSpacing: 0.3,
-  },
-  form: {
-    marginBottom: 28,
-  },
-  inputField: { 
-    marginVertical: -40
-  },
-  erroContainer: {
-    marginTop: -15,
-    marginBottom: 4,
-    justifyContent: 'end',
-  },
-  erroBox: {
-    backgroundColor: '#FFE5E5',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.error,
-  },
-  erroTexto: {
-    color: colors.error,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  esqueceuContainer: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-    marginTop: 6,
-  },
-  esqueceuTexto: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  botaoEntrar: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 17,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  botaoEntrarDesabilitado: {
-    opacity: 0.6,
-  },
-  botaoEntrarTexto: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-});

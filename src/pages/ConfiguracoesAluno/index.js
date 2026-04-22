@@ -1,22 +1,87 @@
-import React, { useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
   Switch,
   Alert,
+  ActivityIndicator
 } from 'react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { colors } from '../../global/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { tokenService } from '../../services/tokenService';
+import { authService } from '../../services/authService';
+import styles from './styles';
 
 export default function ConfiguracoesAluno({ navigation }) {
   const [biometriaAtiva, setBiometriaAtiva] = useState(true);
+  const [biometriaLoading, setBiometriaLoading] = useState(false);
   const [notificacoesAtivas, setNotificacoesAtivas] = useState(true);
   const { signOut, userData } = useAuth();
+
+  useEffect(() => {
+    const carregarPreferenciaBiometria = async () => {
+      const preferencia = await tokenService.obterPreferenciaBiometria();
+      setBiometriaAtiva(preferencia);
+    };
+
+    carregarPreferenciaBiometria();
+  }, []);
+
+  const validarDisponibilidadeBiometria = async () => {
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
+    if (!hasHardware) {
+      Alert.alert('Biometria indisponÃ­vel', 'Este dispositivo nÃ£o possui suporte para biometria.');
+      return false;
+    }
+
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    if (!isEnrolled) {
+      Alert.alert('Biometria nÃ£o configurada', 'Cadastre sua digital ou Face ID nas configuraÃ§Ãµes do aparelho.');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleToggleBiometria = async () => {
+    if (biometriaLoading) return;
+
+    setBiometriaLoading(true);
+    const novoValor = !biometriaAtiva;
+
+    try {
+      if (novoValor) {
+        const podeAtivar = await validarDisponibilidadeBiometria();
+        if (!podeAtivar) {
+          return;
+        }
+
+        try {
+          const ativacao = await authService.ativarLoginBiometria();
+          if (!ativacao?.sucesso) {
+            Alert.alert('Falha ao ativar', 'Servidor nÃ£o retornou token biomÃ©trico para este dispositivo.');
+            return;
+          }
+        } catch (erroAtivacao) {
+          Alert.alert(
+            'Falha ao ativar',
+            erroAtivacao?.message || 'NÃ£o foi possÃ­vel ativar o login biomÃ©trico agora. Tente novamente.'
+          );
+          return;
+        }
+      }
+
+      setBiometriaAtiva(novoValor);
+      await tokenService.salvarPreferenciaBiometria(novoValor);
+    } finally {
+      setBiometriaLoading(false);
+    }
+  };
 
   const usuario = {
     nome: userData?.nome || 'Aluno',
@@ -32,11 +97,11 @@ export default function ConfiguracoesAluno({ navigation }) {
     .map((parte) => parte[0]?.toUpperCase() || '')
     .join('') || 'AL';
 
-  const OptionItem = ({ icone, titulo, subtitulo, onPress, valor, isSwitch, isDanger }) => (
+  const OptionItem = ({ icone, titulo, subtitulo, onPress, valor, isSwitch, isDanger, loading = false }) => (
     <TouchableOpacity 
       style={styles.cardOpcao} 
       onPress={onPress} 
-      disabled={isSwitch}
+      disabled={isSwitch || loading}
       activeOpacity={0.7}
     >
       <View style={styles.iconWrapper}>
@@ -46,12 +111,15 @@ export default function ConfiguracoesAluno({ navigation }) {
         <Text style={[styles.opcaoTitulo, isDanger && styles.opcaoTituloDanger]}>{titulo}</Text>
         {subtitulo && <Text style={styles.opcaoSubtitulo}>{subtitulo}</Text>}
       </View>
-      {isSwitch ? (
+      {isSwitch && loading ? (
+        <ActivityIndicator size="small" color={colors.primary} />
+      ) : isSwitch ? (
         <Switch
-          trackColor={{ false: '#cbd5e1', true: '#bbf7d0' }}
-          thumbColor={valor ? '#16a34a' : '#94a3b8'}
+          trackColor={{ false: '#cbd5e1', true: colors.primaryBorder }}
+          thumbColor={valor ? colors.primary : '#94a3b8'}
           onValueChange={onPress}
           value={valor}
+          disabled={loading}
         />
       ) : (
         <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
@@ -77,7 +145,7 @@ export default function ConfiguracoesAluno({ navigation }) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.topHeader}>
           <Text style={styles.titulo}>Ajustes</Text>
-          <Text style={styles.subtitulo}>Gerencie sua conta e preferências</Text>
+          <Text style={styles.subtitulo}>Gerencie sua conta e preferÃªncias</Text>
         </View>
 
         <View style={styles.bottomSheet}>
@@ -94,7 +162,7 @@ export default function ConfiguracoesAluno({ navigation }) {
             </View>
           </View>
 
-          <Text style={styles.secaoTitulo}>SEGURANÇA E ACESSO</Text>
+          <Text style={styles.secaoTitulo}>SEGURANÃ‡A E ACESSO</Text>
           <View style={styles.grupoCards}>
             <OptionItem 
               icone="finger-print-outline" 
@@ -102,7 +170,8 @@ export default function ConfiguracoesAluno({ navigation }) {
               subtitulo="Usar FaceID ou Digital para entrar"
               isSwitch
               valor={biometriaAtiva}
-              onPress={() => setBiometriaAtiva(!biometriaAtiva)}
+              loading={biometriaLoading}
+              onPress={handleToggleBiometria}
             />
             <OptionItem 
               icone="lock-closed-outline" 
@@ -118,12 +187,12 @@ export default function ConfiguracoesAluno({ navigation }) {
             />
           </View>
 
-        {/* SEÇÃO: PREFERÊNCIAS */}
-        {/* <Text style={styles.secaoTitulo}>PREFERÊNCIAS</Text>
+        {/* SEÃ‡ÃƒO: PREFERÃŠNCIAS */}
+        {/* <Text style={styles.secaoTitulo}>PREFERÃŠNCIAS</Text>
         <View style={styles.grupoCards}>
           <OptionItem 
             icone="notifications-outline" 
-            titulo="Notificações Push" 
+            titulo="NotificaÃ§Ãµes Push" 
             subtitulo="Alertas de treinos e mensalidades"
             isSwitch
             valor={notificacoesAtivas}
@@ -137,7 +206,7 @@ export default function ConfiguracoesAluno({ navigation }) {
           />
         </View> */}
 
-        {/* SEÇÃO: SUPORTE */}
+        {/* SEÃ‡ÃƒO: SUPORTE */}
         {/* <Text style={styles.secaoTitulo}>ESCOLINHA</Text>
         <View style={styles.grupoCards}>
           <OptionItem 
@@ -152,7 +221,7 @@ export default function ConfiguracoesAluno({ navigation }) {
           />
         </View> */}
 
-          <Text style={styles.versao}>Versão 1.0.4 (Beta)</Text>
+          <Text style={styles.versao}>VersÃ£o 1.0.4 (Beta)</Text>
         </View>
 
       </ScrollView>
@@ -160,91 +229,3 @@ export default function ConfiguracoesAluno({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  topHeader: { paddingHorizontal: 20, paddingTop: 80, marginBottom: 14 },
-  titulo: { fontSize: 32, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 },
-  subtitulo: { fontSize: 14, color: colors.textPlaceholder, marginTop: 4 },
-  bottomSheet: {
-    backgroundColor: colors.background,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingTop: 14,
-    paddingBottom: 18,
-    shadowColor: colors.textPlaceholder,
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: -8 },
-    elevation: 20,
-  },
-
-  perfilCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 20,
-    padding: 20,
-    backgroundColor: colors.backgroundSecondary,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 20
-  },
-  avatar: {
-    width: 65,
-    height: 65,
-    borderRadius: 32.5,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  avatarTexto: { color: '#fff', fontSize: 22, fontWeight: '800' },
-  perfilInfo: { marginLeft: 15, flex: 1 },
-  nomeUsuario: { fontSize: 17, fontWeight: '800', color: colors.primaryDark },
-  emailUsuario: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
-  badgeMatricula: { 
-    backgroundColor: '#e2e8f0', 
-    alignSelf: 'flex-start', 
-    paddingHorizontal: 8, 
-    paddingVertical: 2, 
-    borderRadius: 6, 
-    marginTop: 8 
-  },
-  matriculaTexto: { fontSize: 10, fontWeight: '800', color: '#475569' },
-
-  secaoTitulo: { 
-    fontSize: 11, 
-    fontWeight: '900', 
-    color: colors.textPlaceholder, 
-    marginLeft: 20, 
-    marginTop: 20, 
-    marginBottom: 10, 
-    letterSpacing: 1 
-  },
-  grupoCards: { marginHorizontal: 20, backgroundColor: 'transparent' },
-  cardOpcao: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.backgroundSecondary,
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 15,
-    marginBottom: 10,
-    shadowColor: colors.textPlaceholder,
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 1
-  },
-  iconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  opcaoTitulo: { fontSize: 15, fontWeight: '700', color: colors.primaryDark },
-  opcaoTituloDanger: { color: '#dc2626' },
-  opcaoSubtitulo: { fontSize: 12, color: colors.textPlaceholder, marginTop: 2 },
-  versao: { textAlign: 'center', color: '#cbd5e1', fontSize: 12, marginTop: 16 }
-});
