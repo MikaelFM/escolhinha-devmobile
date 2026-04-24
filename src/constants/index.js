@@ -9,11 +9,6 @@ export const API_CONFIG = {
 
 export const APP_VERSION = '1.0.4 (Beta)';
 
-export const MERCADO_PAGO_CONFIG = {
-  PUBLIC_KEY: 'TEST-b8ff20ae-66c1-43cd-af7e-f63074985e77',
-  ACCESS_TOKEN: 'TEST-222746670600055-041618-529914fe169936741dfd5a76e6054fff-1057157750',
-};
-
 export const LAYOUT = {
   WINDOW_WIDTH: width,
   WINDOW_HEIGHT: height,
