@@ -28,6 +28,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
   const [mensalidades, setMensalidades] = useState([]);
   const [pixModalVisible, setPixModalVisible] = useState(false);
   const [pixLoading, setPixLoading] = useState(false);
+  const [pixLoadingId, setPixLoadingId] = useState(null);
   const [pixData, setPixData] = useState({ link: '', qr_code_img: '' });
   const [alertErro, setAlertErro] = useState({ visible: false, title: '', message: '' });
   const { userData } = useAuth();
@@ -85,6 +86,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
   const handleGerarCobrancaPix = async (idMensalidade) => {
     try {
       setPixLoading(true);
+      setPixLoadingId(idMensalidade);
       const resposta = await cobrancaService.gerarCobrancaPix(idMensalidade);
 
       const { link, qr_code_img } = resposta || {};
@@ -107,6 +109,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
       });
     } finally {
       setPixLoading(false);
+      setPixLoadingId(null);
     }
   };
 
@@ -167,7 +170,8 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
                   key={item.id}
                   styles={styles}
                   item={item}
-                  pixLoading={pixLoading}
+                  pixLoading={pixLoadingId === item.id}
+                  pixDisabled={pixLoading}
                   onGerarPix={handleGerarCobrancaPix}
                   verde={colors.success}
                   laranja={colors.amber}

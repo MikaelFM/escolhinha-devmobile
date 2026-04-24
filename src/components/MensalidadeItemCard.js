@@ -7,6 +7,7 @@ export default function MensalidadeItemCard({
   styles,
   item,
   pixLoading,
+  pixDisabled = false,
   onGerarPix,
   verde,
   laranja,
@@ -35,7 +36,7 @@ export default function MensalidadeItemCard({
         <TouchableOpacity
           style={styles.btnPix}
           onPress={() => onGerarPix(item.id)}
-          disabled={pixLoading}
+          disabled={pixDisabled}
         >
           {pixLoading ? (
             <ActivityIndicator size="small" color={colors.textInverted} />
