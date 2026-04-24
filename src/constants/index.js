@@ -3,7 +3,7 @@ import { Dimensions, Platform } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export const API_CONFIG = {
-  BASE_URL: 'http://192.168.0.106:5000/',
+  BASE_URL: 'https://api-projeto-mobile-1.onrender.com/',
   TIMEOUT: 10000,
 };
 
