@@ -1,21 +1,21 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
   SafeAreaView,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
-import { colors } from '../../global/colors';
+import { colors } from '../../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { presencaService } from '../../services/presencaService';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatarDataBR } from '../../utils/formatters';
 import PresencaItemCard from '../../components/PresencaItemCard';
+import DashboardSummaryCard from '../../components/DashboardSummaryCard';
 import styles from './styles';
 
-const VERDE = '#16a34a';
-const VERMELHO = '#dc2626';
 
 const obterDiaSemana = (valor) => {
   const data = new Date(valor);
@@ -29,6 +29,8 @@ const obterDiaSemana = (valor) => {
 
 export default function HistoricoPresencasAluno({ navigation, route }) {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [error, setError] = useState(null);
   const [historico, setHistorico] = useState([]);
   const { userData } = useAuth();
@@ -71,16 +73,21 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
 
         setHistorico(historicoFormatado);
       } catch (err) {
-        console.log('Erro ao carregar histórico de presença:', err);
         setError(err?.message || 'Erro ao carregar histórico de presença');
         setHistorico([]);
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
     };
 
     carregarHistorico();
-  }, [rgAluno]);
+  }, [rgAluno, refreshKey]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setRefreshKey(k => k + 1);
+  }, []);
 
   const stats = useMemo(() => {
     const total = historico.length;
@@ -91,22 +98,35 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
+      >
         <View style={styles.header}>
           <Text style={styles.titulo}>Frequência</Text>
           <Text style={styles.subtitulo}>Acompanhe sua assiduidade nos treinos</Text>
         </View>
 
-        <View style={styles.resumoCard}>
-          <View style={styles.resumoItem}>
-            <Text style={styles.resumoLabel}>TAXA ATUAL</Text>
-            <Text style={[styles.resumoValor, { color: VERDE }]}>{stats.porcentagem}%</Text>
-          </View>
-          <View style={styles.divisor} />
-          <View style={styles.resumoItem}>
-            <Text style={styles.resumoLabel}>TOTAL FALTAS</Text>
-            <Text style={[styles.resumoValor, { color: VERMELHO }]}>{stats.faltas}</Text>
-          </View>
+        <View style={styles.gridStats}>
+          <DashboardSummaryCard
+            styles={styles}
+            titulo="Taxa Atual"
+            valor={`${stats.porcentagem}%`}
+            icone="trending-up"
+            corIcone={colors.success}
+            corValor={colors.success}
+            corFundoIcone={colors.successLight}
+          />
+          <DashboardSummaryCard
+            styles={styles}
+            titulo="Total Faltas"
+            valor={String(stats.faltas)}
+            icone="close-circle-outline"
+            corIcone={colors.error}
+            corValor={colors.error}
+            corFundoIcone={colors.errorLight}
+          />
         </View>
 
         <View style={styles.bottomSheet}>
@@ -120,7 +140,7 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
               </View>
             ) : error ? (
               <View style={styles.errorContainer}>
-                <Ionicons name='alert-circle' size={48} color={VERMELHO} />
+                <Ionicons name='alert-circle' size={48} color={colors.error} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : historico.length > 0 ? (
@@ -129,8 +149,8 @@ export default function HistoricoPresencasAluno({ navigation, route }) {
                   key={item.id}
                   styles={styles}
                   item={item}
-                  verde={VERDE}
-                  vermelho={VERMELHO}
+                  verde={colors.success}
+                  vermelho={colors.error}
                 />
               ))
             ) : (

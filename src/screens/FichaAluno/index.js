@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,18 +8,17 @@ import {
   Switch,
   StatusBar,
   ActivityIndicator,
-  Alert
+  RefreshControl,
 } from 'react-native';
-import { colors } from '../../global/colors';
+import { colors } from '../../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { alunosService } from '../../services/alunosService';
 import { mensalidadesService } from '../../services/mensalidadesService';
-import { maskApenasNumeros, maskCPF, maskData, maskTelefone } from '../../utils/masks';
+import { maskTelefone } from '../../utils/masks';
 import { formatarMesAno, obterIniciaisNome } from '../../utils/formatters';
+import AppAlertModal from '../../components/AppAlertModal';
 import styles from './styles';
 
-const VERDE = '#16a34a';
-const VERMELHO = '#dc2626';
 
 const toNumeroSeguro = (valor) => {
   const numero = Number(valor);
@@ -29,8 +28,11 @@ const toNumeroSeguro = (valor) => {
 export default function FichaAluno({ navigation, route }) {
   const [verTodoFinanceiro, setVerTodoFinanceiro] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [salvandoMensalidadeId, setSalvandoMensalidadeId] = useState(null);
+  const [alertErro, setAlertErro] = useState({ visible: false, title: '', message: '' });
+  const [alertExcluir, setAlertExcluir] = useState(false);
   
   const [aluno, setAluno] = useState({
     nome: '',
@@ -49,11 +51,10 @@ export default function FichaAluno({ navigation, route }) {
   const temHistoricoFinanceiro = aluno.historicoPagamentos.length > 0;
   const temFrequencia = aluno.frequencia !== null && aluno.frequencia !== undefined && aluno.frequencia !== '';
 
-  useEffect(() => {
-    const carregarAluno = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const carregarAluno = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
         
         const rg = route?.params?.rg;
         
@@ -102,15 +103,21 @@ export default function FichaAluno({ navigation, route }) {
           setError('Erro ao carregar dados do aluno');
         }
       } catch (err) {
-        console.log('Erro ao buscar aluno:', err);
         setError(err.message || 'Erro ao carregar dados do aluno');
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
-    };
-
-    carregarAluno();
   }, [route?.params?.rg]);
+
+  useEffect(() => {
+    carregarAluno();
+  }, [carregarAluno]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    carregarAluno();
+  }, [carregarAluno]);
 
   const handleTogglePagamento = async (id, novoValor) => {
     const pagamentoAtual = aluno.historicoPagamentos.find((p) => p.id === id);
@@ -133,39 +140,36 @@ export default function FichaAluno({ navigation, route }) {
       setSalvandoMensalidadeId(id);
       await mensalidadesService.setMensalidadePago({ id, pago: novoValor });
     } catch (err) {
-      console.log('Erro ao atualizar mensalidade:', err);
       setAluno((prev) => ({
         ...prev,
         historicoPagamentos: estadoAnterior,
       }));
-      Alert.alert('Erro', err?.message || 'Não foi possível atualizar a mensalidade.');
+      setAlertErro({
+        visible: true,
+        title: 'Erro',
+        message: err?.message || 'Não foi possível atualizar a mensalidade.',
+      });
     } finally {
       setSalvandoMensalidadeId(null);
     }
   };
 
   const handleExcluirAluno = () => {
-    const rg = aluno.rg || route?.params?.rg;
+    setAlertExcluir(true);
+  };
 
-    Alert.alert('Excluir aluno', 'Tem certeza que deseja excluir este aluno?', [
-      {
-        text: 'Cancelar',
-        style: 'cancel',
-      },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await alunosService.deletarAluno(rg);
-            navigation.goBack();
-          } catch (err) {
-            console.log('Erro ao excluir aluno:', err);
-            Alert.alert('Erro', err.message || 'Não foi possível excluir o aluno.');
-          }
-        },
-      },
-    ]);
+  const confirmarExcluirAluno = async () => {
+    const rg = aluno.rg || route?.params?.rg;
+    try {
+      await alunosService.deletarAluno(rg);
+      navigation.goBack();
+    } catch (err) {
+      setAlertErro({
+        visible: true,
+        title: 'Erro',
+        message: err?.message || 'Não foi possível excluir o aluno.',
+      });
+    }
   };
 
   const pagamentosExibidos = verTodoFinanceiro 
@@ -186,7 +190,7 @@ export default function FichaAluno({ navigation, route }) {
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle" size={48} color="#dc2626" />
+          <Ionicons name="alert-circle" size={48} color={colors.error} />
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity 
             style={styles.btnRetry}
@@ -199,7 +203,11 @@ export default function FichaAluno({ navigation, route }) {
           </TouchableOpacity>
         </View>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 60 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
+        >
         
         <View style={styles.perfilCard}>
           <View style={styles.avatarIniciais}>
@@ -252,7 +260,7 @@ export default function FichaAluno({ navigation, route }) {
             <Text style={styles.labelSecao}>FREQUÊNCIA RECENTE</Text>
             <View style={styles.statsBadgeRow}>
               <Text style={styles.miniStat}>Faltas: {faltaTexto}</Text>
-              <Text style={[styles.miniStat, {color: VERDE}]}>{frequenciaTexto}</Text>
+              <Text style={[styles.miniStat, {color: colors.success}]}>{frequenciaTexto}</Text>
             </View>
           </View>
 
@@ -290,7 +298,7 @@ export default function FichaAluno({ navigation, route }) {
                 return (
                   <View key={`${pag?.id ?? pag?.mes ?? 'pagamento'}-${index}`} style={[styles.pagamentoLinha, index !== 0 && styles.borderTop]}>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.pagamentoMes, !isPago && { color: VERMELHO }]}>{pag.mes}</Text>
+                      <Text style={[styles.pagamentoMes, !isPago && { color: colors.error }]}>{pag.mes}</Text>
                       <Text style={styles.pagamentoValor}>R$ {String(pag.valor ?? '0.00')}</Text>
                       <View style={[styles.statusPilula, isPago ? styles.statusVerde : styles.statusVermelho]}>
                         <Text style={[styles.statusTexto, isPago ? styles.statusTextoVerde : styles.statusTextoVermelho]}>
@@ -307,8 +315,8 @@ export default function FichaAluno({ navigation, route }) {
                       </View>
                     ) : (
                       <Switch
-                        trackColor={{ false: '#cbd5e1', true: colors.primaryBorder }}
-                        thumbColor={isPago ? colors.primary : '#94a3b8'}
+                        trackColor={{ false: colors.borderStrong, true: colors.primaryBorder }}
+                        thumbColor={isPago ? colors.primary : colors.textPlaceholder}
                         onValueChange={(valor) => handleTogglePagamento(pag.id, valor)}
                         value={isPago}
                         disabled={desabilitado}
@@ -334,16 +342,36 @@ export default function FichaAluno({ navigation, route }) {
             style={styles.btnEditar}
             onPress={() => navigation.navigate('cadastroAluno', { id: aluno.rg || route?.params?.rg })}
           >
-            <Ionicons name="create-outline" size={20} color="#fff" />
+            <Ionicons name="create-outline" size={20} color={colors.textInverted} />
             <Text style={styles.btnEditarTexto}>Editar Ficha</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.btnExcluir} onPress={handleExcluirAluno}>
-            <Ionicons name="trash-outline" size={20} color={VERMELHO} />
+            <Ionicons name="trash-outline" size={20} color={colors.error} />
           </TouchableOpacity>
         </View>
 
       </ScrollView>
       )}
+
+      <AppAlertModal
+        visible={alertErro.visible}
+        title={alertErro.title}
+        message={alertErro.message}
+        variant="error"
+        onRequestClose={() => setAlertErro({ visible: false, title: '', message: '' })}
+      />
+
+      <AppAlertModal
+        visible={alertExcluir}
+        title="Excluir aluno"
+        message="Tem certeza que deseja excluir este aluno?"
+        variant="warning"
+        actions={[
+          { label: 'Cancelar', variant: 'secondary' },
+          { label: 'Excluir', onPress: confirmarExcluirAluno },
+        ]}
+        onRequestClose={() => setAlertExcluir(false)}
+      />
     </SafeAreaView>
   );
 }

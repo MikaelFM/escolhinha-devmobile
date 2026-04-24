@@ -1,10 +1,10 @@
-﻿import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { colors } from '../../global/colors';
+﻿import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { colors } from '../../constants/colors';
 
 import DashboardAluno from '../DashboardAluno';
 import HistoricoPresencasGeral from '../HistoricoPresencaAluno';
 import HistoricoPagamentosAluno from '../HistoricoPagamentosAluno';
-import ConfiguracoesAluno from '../ConfiguracoesAluno';
+import AjustesAluno from '../AjustesAluno';
 
 import { Ionicons } from '@expo/vector-icons'
 import { Feather } from '@expo/vector-icons';
@@ -18,12 +18,12 @@ export default function HomeAluno() {
             screenOptions={{
                 tabBarShowLabel: false,
                 tabBarActiveTintColor: colors.primary,
-                tabBarInactiveTintColor: '#94a3b8',
+                tabBarInactiveTintColor: colors.textPlaceholder,
                 tabBarStyle: {
                     position: 'absolute',
                     borderTopWidth: 0,
                     elevation: 0,
-                    backgroundColor: '#ffffff',
+                    backgroundColor: colors.background,
                     paddingTop: 8,
                     paddingBottom: 10,
                 }
@@ -61,7 +61,7 @@ export default function HomeAluno() {
             />
             <Tab.Screen
                 name='configuracoesAluno'
-                component={ConfiguracoesAluno}
+                component={AjustesAluno}
                 options={{
                     headerShown: false,
                     tabBarIcon: ({color, size, focused}) => {

@@ -1,19 +1,46 @@
-﻿import { StyleSheet, Dimensions } from 'react-native';
-import { colors } from '../../global/colors';
+import { StyleSheet, Dimensions } from 'react-native';
+import { colors } from '../../constants/colors';
 
 const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   topHeader: {
     marginTop: 70,
     paddingHorizontal: 20,
     marginBottom: 30,
   },
-  saudacao: { fontSize: 26, fontWeight: '800', color: colors.primaryMedium },
-  subSaudacao: { fontSize: 15, color: colors.textSecondary, marginTop: 4 },
-  gridStats: { 
-    flexDirection: 'row', 
+  saudacao: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: colors.primaryDark,
+  },
+  categoriaBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginTop: 6,
+    marginBottom: 2,
+  },
+  categoriaTexto: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.primaryLight,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  subSaudacao: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    marginTop: 6,
+  },
+  gridStats: {
+    flexDirection: 'row',
     paddingHorizontal: 20,
     paddingBottom: 8,
     justifyContent: 'space-between',
@@ -27,7 +54,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryBorder,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12
+    gap: 12,
   },
   iconContainer: {
     width: 38,
@@ -35,10 +62,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
-  cardLabel: { fontSize: 10, fontWeight: '700', color: colors.textPlaceholder, textTransform: 'uppercase' },
-  cardValor: { fontSize: 20, fontWeight: '800', color: colors.primaryDark },
+  cardLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textPlaceholder,
+    textTransform: 'uppercase',
+  },
+  cardValor: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.primaryDark,
+  },
   bottomSheet: {
     flex: 1,
     backgroundColor: colors.background,
@@ -52,7 +88,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -8 },
     elevation: 20,
   },
-  secaoTitulo: { fontSize: 12, fontWeight: '800', color: colors.textSecondary, letterSpacing: 1, marginLeft: 20, marginTop: 24 },
+  secaoTitulo: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: colors.textSecondary,
+    letterSpacing: 1,
+    marginLeft: 20,
+    marginTop: 24,
+  },
   gridAcoes: {
     flexDirection: 'column',
     marginHorizontal: 20,
@@ -82,11 +125,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  btnAcaoConteudo: { flex: 1, marginLeft: 4 },
-  btnAcaoUltimo: { borderBottomWidth: 0 },
-  btnAcaoTexto: { fontSize: 15, fontWeight: '700', color: colors.primaryDark },
+  btnAcaoConteudo: {
+    flex: 1,
+    marginLeft: 4,
+  },
+  btnAcaoUltimo: {
+    borderBottomWidth: 0,
+  },
+  btnAcaoTexto: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.primaryDark,
+  },
 });
 
 export default styles;
-
-

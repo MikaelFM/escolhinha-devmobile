@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,9 @@ import {
   TextInput,
   StatusBar,
   ActivityIndicator,
-  Alert
+  RefreshControl,
 } from 'react-native';
-import { colors } from '../../global/colors';
+import { colors } from '../../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { mensalidadesService } from '../../services';
 import {
@@ -19,15 +19,13 @@ import {
   formatarDataBR,
   formatarMesAno,
   formatarMoedaBR,
-  MesReferencia,
   obterChaveMes,
   obterMesAtual,
   parseDataISO,
 } from '../../utils/formatters';
+import AppAlertModal from '../../components/AppAlertModal';
 import styles from './styles';
 
-const VERDE = '#16a34a';
-const VERMELHO = '#dc2626';
 
 const extrairListaMensalidades = (resposta) => {
   const lista = resposta?.mensalidades ?? resposta?.data?.mensalidades ?? resposta?.data ?? [];
@@ -55,7 +53,7 @@ const extrairPeriodoAulas = (resposta, lista) => {
   };
 };
 
-export default function HistoricoMensalidades({ navigation }) {
+export default function HistoricoMensalidades() {
   const mesAtual = useMemo(() => obterMesAtual(), []);
   const chaveMesAtual = useMemo(() => obterChaveMes(mesAtual.mes, mesAtual.ano), [mesAtual]);
 
@@ -64,7 +62,10 @@ export default function HistoricoMensalidades({ navigation }) {
   const [mesSelecionadoKey, setMesSelecionadoKey] = useState(chaveMesAtual);
   const [dados, setDados] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [erro, setErro] = useState('');
+  const [alertErro, setAlertErro] = useState({ visible: false, title: '', message: '' });
   const [salvandoId, setSalvandoId] = useState(null);
   const [selectMesAberto, setSelectMesAberto] = useState(false);
   const requestIdRef = useRef(0);
@@ -159,7 +160,6 @@ export default function HistoricoMensalidades({ navigation }) {
           return;
         }
 
-        console.log('Erro ao carregar mensalidades:', error);
         setErro(error?.message || 'Erro ao carregar mensalidades.');
         setDados([]);
       } finally {
@@ -168,11 +168,17 @@ export default function HistoricoMensalidades({ navigation }) {
         }
 
         setLoading(false);
+        setRefreshing(false);
       }
     };
 
     carregarMensalidades();
-  }, [mesSelecionadoKey, mesAtual, chaveMesAtual]);
+  }, [mesSelecionadoKey, mesAtual, chaveMesAtual, refreshKey]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setRefreshKey(k => k + 1);
+  }, []);
 
   const mesSelecionado = useMemo(
     () => mesesPeriodo.find((item) => item.key === mesSelecionadoKey) || null,
@@ -214,9 +220,12 @@ export default function HistoricoMensalidades({ navigation }) {
         pago: novoPago,
       });
     } catch (error) {
-      console.log('Erro ao atualizar mensalidade:', error);
       setDados(estadoAnterior);
-      Alert.alert('Erro', error?.message || 'Não foi possível atualizar a mensalidade.');
+      setAlertErro({
+        visible: true,
+        title: 'Erro',
+        message: error?.message || 'Não foi possível atualizar a mensalidade.',
+      });
     } finally {
       setSalvandoId(null);
     }
@@ -224,16 +233,20 @@ export default function HistoricoMensalidades({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
+      >
         {/* BUSCA PADRONIZADA */}
         <View style={styles.buscaWrapper}>
-          <Ionicons name="search-outline" size={20} color="#94a3b8" />
-          <TextInput 
+          <Ionicons name="search-outline" size={20} color={colors.textPlaceholder} />
+          <TextInput
             style={styles.buscaInput}
             placeholder="Buscar por nome do aluno..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={colors.textPlaceholder}
             value={busca}
             onChangeText={setBusca}
           />
@@ -251,7 +264,7 @@ export default function HistoricoMensalidades({ navigation }) {
             <Ionicons
               name={selectMesAberto ? 'chevron-up' : 'chevron-down'}
               size={18}
-              color="#64748b"
+              color={colors.textSecondary}
             />
           </TouchableOpacity>
 
@@ -292,12 +305,12 @@ export default function HistoricoMensalidades({ navigation }) {
             </View>
           ) : erro ? (
             <View style={styles.estadoContainer}>
-              <Ionicons name="alert-circle-outline" size={44} color={VERMELHO} />
+              <Ionicons name="alert-circle-outline" size={44} color={colors.error} />
               <Text style={styles.estadoTexto}>{erro}</Text>
             </View>
           ) : mensalidadesFiltradas.length === 0 ? (
             <View style={styles.estadoContainer}>
-              <Ionicons name="document-text-outline" size={44} color="#94a3b8" />
+              <Ionicons name="document-text-outline" size={44} color={colors.textPlaceholder} />
               <Text style={styles.estadoTexto}>Nenhuma mensalidade encontrada.</Text>
             </View>
           ) : mensalidadesFiltradas.map((item) => {
@@ -311,7 +324,7 @@ export default function HistoricoMensalidades({ navigation }) {
                     </Text>
                   </View>
                   
-                  <Text style={[styles.nomeAluno, !isPago && { color: VERMELHO }]}>
+                  <Text style={[styles.nomeAluno, !isPago && { color: colors.error }]}>
                     {item.nome}
                   </Text>
                   <Text style={styles.rgAluno}>RG {item.rgAluno}</Text>
@@ -328,8 +341,8 @@ export default function HistoricoMensalidades({ navigation }) {
                 <View style={styles.switchWrapper}>
                   <Text style={styles.labelSwitch}>PAGO</Text>
                   <Switch
-                    trackColor={{ false: '#cbd5e1', true: colors.primaryBorder }}
-                    thumbColor={isPago ? colors.primary : '#94a3b8'}
+                    trackColor={{ false: colors.borderStrong, true: colors.primaryBorder }}
+                    thumbColor={isPago ? colors.primary : colors.textPlaceholder}
                     onValueChange={() => handleTogglePagamento(item)}
                     value={isPago}
                     disabled={salvandoId === item.id || item.pagoViaPix}
@@ -340,6 +353,14 @@ export default function HistoricoMensalidades({ navigation }) {
           })}
         </View>
       </ScrollView>
+
+      <AppAlertModal
+        visible={alertErro.visible}
+        title={alertErro.title}
+        message={alertErro.message}
+        variant="error"
+        onRequestClose={() => setAlertErro({ visible: false, title: '', message: '' })}
+      />
     </SafeAreaView>
   );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../global/colors';
+import { colors } from '../constants/colors';
 
 export default function SettingsOptionItem({
   styles,
@@ -25,7 +25,7 @@ export default function SettingsOptionItem({
       <View
         style={[
           styles.iconWrapper,
-          dangerIconBackground && isDanger && { backgroundColor: '#fef2f2' },
+          dangerIconBackground && isDanger && { backgroundColor: colors.errorLight },
         ]}
       >
         <Ionicons name={icone} size={22} color={isDanger ? colors.error : colors.primary} />
@@ -40,14 +40,14 @@ export default function SettingsOptionItem({
         <ActivityIndicator size="small" color={colors.primary} />
       ) : isSwitch ? (
         <Switch
-          trackColor={{ false: '#cbd5e1', true: colors.primaryBorder }}
-          thumbColor={valor ? colors.primary : '#94a3b8'}
+          trackColor={{ false: colors.borderStrong, true: colors.primaryBorder }}
+          thumbColor={valor ? colors.primary : colors.textPlaceholder}
           onValueChange={onPress}
           value={valor}
           disabled={loading}
         />
       ) : (
-        <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+        <Ionicons name="chevron-forward" size={20} color={colors.borderStrong} />
       )}
     </TouchableOpacity>
   );

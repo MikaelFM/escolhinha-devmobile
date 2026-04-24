@@ -4,7 +4,7 @@ import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
-import Home from '../screens/Home';
+import HomeProfessor from '../screens/HomeProfessor';
 import HomeAluno from '../screens/HomeAluno';
 import FichaAluno from '../screens/FichaAluno';
 import RegistroPresenca from '../screens/RegistroPresenca';
@@ -13,7 +13,7 @@ import HistoricoMensalidades from '../screens/HistoricoMensalidades';
 import CadastroAluno from '../screens/CadastroAluno';
 import AlteracaoSenha from '../screens/AlteracaoSenha';
 import Configuracoes from '../screens/Configuracoes';
-import { colors } from '../global/colors';
+import { colors } from '../constants/colors';
 
 const Stack = createStackNavigator();
 
@@ -41,13 +41,13 @@ export default function Routes({ userRole }) {
           elevation: 0,
           shadowOpacity: 0,
           borderBottomWidth: 1,
-          borderBottomColor: '#e2e8f0',
+          borderBottomColor: colors.borderMedium,
         }
       }}
     >
-      {userRole === 'professor' ? (
+      {userRole === 'ADMIN' ? (
         <>
-          <Stack.Screen name="home" component={Home} options={{ headerShown: false }} />
+          <Stack.Screen name="home" component={HomeProfessor} options={{ headerShown: false }} />
           <Stack.Screen name="fichaAluno" component={FichaAluno} options={{ ...headerComVoltar, headerTitle: 'Ficha do Aluno' }} />
           <Stack.Screen name="registroPresenca" component={RegistroPresenca} options={{ headerShown: false }} />
           <Stack.Screen name="listAlunos" component={ListAlunos} options={{ headerShown: false }} />

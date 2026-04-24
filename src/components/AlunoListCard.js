@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../constants/colors';
 
 export default function AlunoListCard({
   styles,
@@ -26,8 +27,8 @@ export default function AlunoListCard({
           </Text>
         </View>
 
-        <View style={[styles.statusBadge, { backgroundColor: emDia ? '#f0fdf4' : '#fef2f2' }]}>
-          <Text style={[styles.statusTexto, { color: emDia ? '#16a34a' : '#dc2626' }]}>
+        <View style={[styles.statusBadge, { backgroundColor: emDia ? colors.successLight : colors.errorLight }]}>
+          <Text style={[styles.statusTexto, { color: emDia ? colors.success : colors.error }]}>
             {emDia ? 'EM DIA' : 'ATRASO'}
           </Text>
         </View>
@@ -35,16 +36,16 @@ export default function AlunoListCard({
 
       <View style={styles.cardFooter}>
         <View style={styles.statItem}>
-          <Ionicons name="calendar-outline" size={14} color="#94a3b8" />
+          <Ionicons name="calendar-outline" size={14} color={colors.textPlaceholder} />
           <Text style={styles.statTexto}>{Math.round(frequencia)}% Frequência</Text>
         </View>
 
         <View style={styles.statItem}>
-          <Ionicons name="alert-circle-outline" size={14} color="#94a3b8" />
+          <Ionicons name="alert-circle-outline" size={14} color={colors.textPlaceholder} />
           <Text style={styles.statTexto}>{faltas} Faltas</Text>
         </View>
 
-        <Ionicons name="chevron-forward" size={16} color="#cbd5e1" style={{ marginLeft: 'auto' }} />
+        <Ionicons name="chevron-forward" size={16} color={colors.borderStrong} style={{ marginLeft: 'auto' }} />
       </View>
     </TouchableOpacity>
   );

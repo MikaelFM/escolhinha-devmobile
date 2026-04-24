@@ -48,40 +48,49 @@ api.interceptors.response.use(
   async (error) => {
     let message = 'Erro ao conectar com o servidor';
 
+    console.log('error', error.response.data.mensagem);
+
     if (error.response) {
+      const serverMessage = error.response.data?.mensagem || error.response.data?.erro || error.response.data?.error;
+
       switch (error.response.status) {
         case 400:
-          message = error.response.data?.message || 'Requisição inválida';
+          message = serverMessage || 'Requisição inválida';
           break;
-        case 401:
-          message = 'Sessão expirada. Faça login novamente';
-          await tokenService.limparToken();
-          if (typeof onUnauthorized === 'function') {
-            onUnauthorized();
+        case 401: {
+          const tokenAtivo = await tokenService.obterToken();
+          if (tokenAtivo) {
+            message = serverMessage || 'Sessão expirada. Faça login novamente';
+            await tokenService.limparToken();
+            if (typeof onUnauthorized === 'function') {
+              onUnauthorized();
+            }
+          } else {
+            message = serverMessage || 'E-mail ou senha incorretos';
           }
           break;
+        }
         case 403:
-          message = 'Acesso negado';
+          message = serverMessage || 'Acesso negado';
           break;
         case 404:
-          message = 'Recurso não encontrado';
+          message = serverMessage || 'Recurso não encontrado';
+          break;
+        case 409:
+          message = serverMessage || 'Conflito de dados';
+          break;
+        case 422:
+          message = serverMessage || 'Dados inválidos';
           break;
         case 500:
-          message = 'Erro no servidor';
+          message = serverMessage || 'Erro no servidor';
           break;
         default:
-          message = error.response.data?.message || 'Erro desconhecido';
+          message = serverMessage || 'Erro desconhecido';
       }
     } else if (error.request) {
       message = 'Sem conexão com o servidor';
     }
-
-    console.log('API Error:', {
-      message,
-      status: error.response?.status,
-      data: error.response?.data,
-      url: error.config?.url,
-    });
 
     return Promise.reject({
       message,

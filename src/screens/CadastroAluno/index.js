@@ -10,14 +10,16 @@ import {
   Platform
 } from 'react-native';
 
-import { maskApenasNumeros, maskCPF, maskData, maskTelefone } from '../../utils/masks';
-import { validaCPF, validaData, validaObrigatorio, validaTelefone } from '../../utils/validators';
+import { maskCPF, maskRG, maskTelefone } from '../../utils/masks';
+import { validaCPF, validaData, validaObrigatorio, validaTelefone } from '../../utils/validadores';
 import InputField from '../../components/InputField';
-import { colors } from '../../global/colors';
+import { colors } from '../../constants/colors';
 import { alunosService } from '../../services';
 import { categoriasService } from '../../services/categoriasService';
 import { responsavelService } from '../../services/responsavelService';
-import { normalizarTexto } from '../../utils/formatters';
+import { converterDataBRParaDate, formatarDataBR, normalizarTexto } from '../../utils/formatters';
+import ModalDatePicker from '../RegistroPresenca/ModalDatePicker';
+import AppAlertModal from '../../components/AppAlertModal';
 import styles from './styles';
 
 const FORM_INICIAL = {
@@ -43,6 +45,22 @@ export default function CadastroAluno({ navigation, route }) {
   const [sucesso, setSucesso] = useState(false);
   const [categorias, setCategorias] = useState([]);
   const [carregandoAluno, setCarregandoAluno] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [pickerVisivel, setPickerVisivel] = useState(false);
+  const [dataPicker, setDataPicker] = useState(new Date());
+  const [jaAcessou, setJaAcessou] = useState(false);
+  const [alertErro, setAlertErro] = useState({ visible: false, title: '', message: '' });
+  const [alertSucesso, setAlertSucesso] = useState({ visible: false, title: '', message: '' });
+
+  const parseBoolean = (valor) => {
+    if (typeof valor === 'boolean') return valor;
+    if (typeof valor === 'number') return valor === 1;
+    if (typeof valor === 'string') {
+      const texto = valor.trim().toLowerCase();
+      return texto === '1' || texto === 'true';
+    }
+    return false;
+  };
 
   useEffect(() => {
     carregarCategorias();
@@ -53,6 +71,7 @@ export default function CadastroAluno({ navigation, route }) {
       if (!idDaRota) {
         setForm({ ...FORM_INICIAL });
         setRgOriginal('');
+        setJaAcessou(false);
         setSucesso(false);
         setErros({});
         return;
@@ -83,8 +102,8 @@ export default function CadastroAluno({ navigation, route }) {
         });
 
         setRgOriginal(normalizarTexto(aluno.rg_aluno || aluno.rg || idDaRota));
+        setJaAcessou(aluno.ja_acessou === 1);
       } catch (erro) {
-        console.log('Erro ao carregar aluno para edição:', erro);
       } finally {
         setCarregandoAluno(false);
       }
@@ -98,7 +117,6 @@ export default function CadastroAluno({ navigation, route }) {
       const response = await categoriasService.listarCategorias();
       setCategorias(response.data);
     } catch (erro) {
-      console.log('Erro ao carregar categorias:', erro);
     }
   };
 
@@ -154,7 +172,6 @@ export default function CadastroAluno({ navigation, route }) {
 
     if (cleanCPF.length === 11) {
       const response = await responsavelService.getResponsavelCPF(cleanCPF);
-      console.log(response);
 
       if (response.status === 200) {
         setField('nome_responsavel', response.nome);
@@ -163,18 +180,55 @@ export default function CadastroAluno({ navigation, route }) {
     }
   };
 
+  const gerarSenhaPadrao = (dataNascimento) => {
+    const [dia, mes, ano] = String(dataNascimento || '').split('/');
+    if (!dia || !mes || !ano) return '';
+    return `${ano}${mes}${dia}`;
+  };
+
   const handleSalvar = async () => {
+    if (isSaving) {
+      return;
+    }
+
     if (!validar()) {
       return;
     }
 
-    const response = modoEdicao
-      ? await alunosService.atualizarAluno(rgOriginal || form.rg, form)
-      : await alunosService.cadastrarAluno(form);
+    try {
+      setIsSaving(true);
 
-    console.log('Resposta salvar aluno:', response);
-    if (response.status === 200 || response.status === 201) {
-      navigation.goBack();
+      const response = modoEdicao
+        ? await alunosService.atualizarAluno(rgOriginal || form.rg, form)
+        : await alunosService.cadastrarAluno(form);
+
+      console.log(response);
+
+      if (response.status === 200 || response.status === 201) {
+        const senhaPadrao = gerarSenhaPadrao(form.data_nascimento);
+        const deveMostrarCredenciais = !modoEdicao || !jaAcessou;
+        const title = modoEdicao ? 'Aluno atualizado com sucesso' : 'Aluno cadastrado com sucesso';
+
+        const mensagemBase = modoEdicao
+          ? 'Os dados do aluno foram atualizados com sucesso.'
+          : 'O aluno foi cadastrado com sucesso.';
+
+        const mensagemCredenciais = `\n\nO aluno já pode acessar o sistema com as credenciais abaixo:\n\nLogin: ${form.rg}\nSenha: ${senhaPadrao}`;
+
+        setAlertSucesso({
+          visible: true,
+          title,
+          message: deveMostrarCredenciais ? `${mensagemBase}${mensagemCredenciais}` : mensagemBase,
+        });
+      }
+    } catch (erro) {
+      setAlertErro({
+        visible: true,
+        title: 'Erro',
+        message: erro?.message || 'Não foi possível salvar o aluno.',
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -183,6 +237,17 @@ export default function CadastroAluno({ navigation, route }) {
     setField('categoria', nomeCategoria);
     setField('id_categoria', categoria?.id ?? null);
     setModalCategoria(false);
+  };
+
+  const abrirDatePickerNascimento = () => {
+    setDataPicker(converterDataBRParaDate(form.data_nascimento));
+    setPickerVisivel(true);
+  };
+
+  const fecharSucesso = () => {
+    setAlertSucesso({ visible: false, title: '', message: '' });
+
+    navigation?.navigate?.('listAlunos', { refreshKey: Date.now() });
   };
 
   return (
@@ -228,7 +293,7 @@ export default function CadastroAluno({ navigation, route }) {
               value={form.rg}
               onChangeText={v => setField('rg', v)}
               erro={erros.rg}
-              mascara={maskApenasNumeros}
+              mascara={maskRG}
               keyboardType="numeric"
               disabled={modoEdicao}
             />
@@ -244,16 +309,17 @@ export default function CadastroAluno({ navigation, route }) {
               keyboardType="phone-pad"
             />
 
-            <InputField
-              label="Data de nascimento"
-              obrigatorio
-              placeholder="DD/MM/AAAA"
-              value={form.data_nascimento}
-              onChangeText={v => setField('data_nascimento', v)}
-              erro={erros.data_nascimento}
-              mascara={maskData}
-              keyboardType="numeric"
-            />
+            <TouchableOpacity activeOpacity={0.85} onPress={abrirDatePickerNascimento}>
+              <View pointerEvents="none">
+                <InputField
+                  label="Data de nascimento"
+                  obrigatorio
+                  placeholder="DD/MM/AAAA"
+                  value={form.data_nascimento}
+                  erro={erros.data_nascimento}
+                />
+              </View>
+            </TouchableOpacity>
 
             <InputField
               label="CPF do responsável"
@@ -308,17 +374,57 @@ export default function CadastroAluno({ navigation, route }) {
             )}
 
             <TouchableOpacity
-              style={styles.botaoSalvar}
+              style={[styles.botaoSalvar, isSaving ? { opacity: 0.8 } : null]}
               activeOpacity={0.85}
               onPress={handleSalvar}
-              disabled={carregandoAluno}
+              disabled={carregandoAluno || isSaving}
             >
-              <Text style={styles.botaoSalvarTexto}>{modoEdicao ? 'Salvar alterações' : 'Salvar'}</Text>
+              {isSaving ? (
+                <View style={styles.botaoSalvarConteudo}>
+                  <ActivityIndicator size="small" color={colors.textInverted} />
+                  <Text style={styles.botaoSalvarTexto}>Salvando...</Text>
+                </View>
+              ) : (
+                <Text style={styles.botaoSalvarTexto}>{modoEdicao ? 'Salvar alterações' : 'Salvar'}</Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>
         </KeyboardAvoidingView>
       )}
+
+      <ModalDatePicker
+        visible={pickerVisivel}
+        dataPicker={dataPicker}
+        maximumDate={new Date()}
+        onChange={(event, selectedDate) => {
+          if (event?.type === 'dismissed') {
+            setPickerVisivel(false);
+            return;
+          }
+
+          if (selectedDate) {
+            setField('data_nascimento', formatarDataBR(selectedDate));
+            setPickerVisivel(false);
+          }
+        }}
+      />
+
+      <AppAlertModal
+        visible={alertErro.visible}
+        title={alertErro.title}
+        message={alertErro.message}
+        variant="error"
+        onRequestClose={() => setAlertErro({ visible: false, title: '', message: '' })}
+      />
+
+      <AppAlertModal
+        visible={alertSucesso.visible}
+        title={alertSucesso.title}
+        message={alertSucesso.message}
+        variant="success"
+        onRequestClose={fecharSucesso}
+      />
     </SafeAreaView>
   );
 }

@@ -21,7 +21,6 @@ export const tokenService = {
 
     return true;
   } catch (erro) {
-    console.log('Erro ao salvar token:', erro);
     return false;
   }
 },

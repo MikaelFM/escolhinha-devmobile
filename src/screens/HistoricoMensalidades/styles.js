@@ -1,98 +1,363 @@
-﻿import { StyleSheet } from 'react-native';
-import { colors } from '../../global/colors';
+import { StyleSheet, Dimensions } from 'react-native';
+import { colors } from '../../constants/colors';
 
-const VERDE = '#16a34a';
-const VERMELHO = '#dc2626';
-const AZUL_CLARO = '#e0f2fe';
-const LARANJA = '#f59e0b';
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-
-  buscaWrapper: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#ffffff', 
-    borderRadius: 16, 
-    marginHorizontal: 20, 
-    marginTop: 20, 
-    paddingHorizontal: 15, 
-    borderWidth: 1, 
-    borderColor: '#e2e8f0', 
-    height: 55 
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
   },
-  buscaInput: { flex: 1, fontSize: 15, color: '#1e293b', marginLeft: 10 },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    marginBottom: 20,
+  },
+  backBtn: {
+    marginLeft: -10,
+    marginBottom: 10,
+  },
+  titulo: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: colors.primaryDark,
+    letterSpacing: -0.5,
+    marginTop: 40,
+  },
+  subtitulo: {
+    fontSize: 14,
+    color: colors.textPlaceholder,
+    marginTop: 4,
+  },
 
-  selectContainer: { paddingHorizontal: 20, marginTop: 15 },
-  selectTrigger: {
-    height: 48,
-    borderRadius: 14,
+  gridStats: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  cardResumo: {
+    width: (width / 2) - 28,
+    backgroundColor: colors.background,
+    padding: 16,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 14,
+    borderColor: colors.primaryBorder,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 12,
   },
-  selectTriggerTexto: { fontSize: 14, fontWeight: '700', color: '#334155' },
-  selectLista: {
+  iconContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textPlaceholder,
+    textTransform: 'uppercase',
+  },
+  cardValor: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.primaryDark,
+  },
+
+  bottomSheet: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     marginTop: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    paddingTop: 12,
+    paddingBottom: 24,
+  },
+  secaoTitulo: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: colors.textPlaceholder,
+    marginLeft: 20,
+    marginBottom: 15,
+    letterSpacing: 1,
+  },
+
+  buscaWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 14,
-    backgroundColor: '#ffffff',
+    marginHorizontal: 20,
+    marginBottom: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.borderMedium,
+  },
+  buscaInput: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.text,
+  },
+
+  selectContainer: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  selectTrigger: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundSecondary,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: colors.borderMedium,
+  },
+  selectTriggerTexto: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  selectLista: {
+    backgroundColor: colors.background,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.borderMedium,
+    marginTop: 4,
     overflow: 'hidden',
   },
   selectItem: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: colors.borderLight,
   },
-  selectItemAtivo: { backgroundColor: '#eff6ff' },
-  selectItemTexto: { fontSize: 14, color: '#475569', fontWeight: '600' },
-  selectItemTextoAtivo: { color: colors.primary, fontWeight: '800' },
+  selectItemAtivo: {
+    backgroundColor: colors.primaryLight,
+  },
+  selectItemTexto: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  selectItemTextoAtivo: {
+    color: colors.primary,
+    fontWeight: '700',
+  },
 
-  secaoHeader: { paddingHorizontal: 20, paddingTop: 25, paddingBottom: 12 },
-  secaoTitulo: { fontSize: 11, fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1 },
+  secaoHeader: {
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
 
-  listaContainer: { paddingHorizontal: 20 },
-  estadoContainer: {
-    padding: 24,
+  listaContainer: {
+    marginHorizontal: 20,
+  },
+  cardMensalidade: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+    paddingHorizontal: 10,
+  },
+  cardPendente: {
+    backgroundColor: colors.warningVeryLight,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    borderBottomWidth: 0,
+    marginBottom: 10,
+  },
+  iconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
   },
-  estadoTexto: { marginTop: 12, fontSize: 14, fontWeight: '600', color: '#475569', textAlign: 'center' },
-  cardAluno: { 
-    backgroundColor: '#ffffff', 
-    marginBottom: 10, 
-    padding: 18, 
-    borderRadius: 16, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    borderWidth: 1, 
-    borderColor: '#e2e8f0' 
+  mesTitulo: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.primaryDark,
   },
-  nomeAluno: { fontSize: 16, fontWeight: '800', color: colors.primary, marginTop: 8 },
-  rgAluno: { fontSize: 11, color: '#94a3b8', fontWeight: '700', marginTop: 2 },
-  infoFinanceira: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
-  valorTexto: { fontSize: 13, fontWeight: '700', color: '#475569' },
-  dataTexto: { fontSize: 11, fontWeight: '600', color: VERDE },
-  mesRefTexto: { fontSize: 11, color: '#94a3b8', fontWeight: '600', marginTop: 4 },
+  valorSubtitulo: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  pixInfo: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.pix,
+    marginTop: 3,
+  },
 
-  statusPilula: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, alignSelf: 'flex-start' },
-  statusVerde: { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' },
-  statusVermelho: { backgroundColor: '#fef2f2', borderColor: '#fca5a5' },
-  statusTexto: { fontSize: 8, fontWeight: '900' },
-  statusTextoVerde: { color: VERDE },
-  statusTextoVermelho: { color: VERMELHO },
+  btnPix: {
+    backgroundColor: colors.amber,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    gap: 5,
+  },
+  btnPixTexto: {
+    color: colors.textInverted,
+    fontSize: 11,
+    fontWeight: '800',
+  },
 
-  switchWrapper: { alignItems: 'center', marginLeft: 15 },
-  labelSwitch: { fontSize: 8, fontWeight: '900', color: '#94a3b8', marginBottom: 4 }
+  badgePago: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: colors.successLight,
+  },
+  badgePagoTexto: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: colors.success,
+  },
+
+  estadoContainer: {
+    paddingVertical: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  estadoTexto: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+
+  cardAluno: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: colors.borderMedium,
+  },
+
+  statusPilula: {
+    alignSelf: 'flex-start',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginBottom: 6,
+  },
+  statusVerde: {
+    backgroundColor: colors.successLight,
+  },
+  statusVermelho: {
+    backgroundColor: colors.errorVeryLight,
+  },
+  statusTexto: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  statusTextoVerde: {
+    color: colors.success,
+  },
+  statusTextoVermelho: {
+    color: colors.error,
+  },
+
+  nomeAluno: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.primaryDark,
+    marginBottom: 2,
+  },
+  rgAluno: {
+    fontSize: 12,
+    color: colors.textPlaceholder,
+    marginBottom: 4,
+  },
+  infoFinanceira: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  valorTexto: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  dataTexto: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  mesRefTexto: {
+    fontSize: 11,
+    color: colors.textPlaceholder,
+  },
+
+  switchWrapper: {
+    alignItems: 'center',
+    marginLeft: 12,
+    gap: 4,
+  },
+  labelSwitch: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: colors.textPlaceholder,
+    letterSpacing: 0.5,
+  },
+
+  loadingContainer: {
+    paddingVertical: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  errorContainer: {
+    paddingVertical: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    marginTop: 10,
+    color: colors.error,
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  vazioTexto: {
+    color: colors.textPlaceholder,
+    fontSize: 13,
+    fontWeight: '600',
+    paddingVertical: 12,
+  },
+
+  infoFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 30,
+    marginTop: 30,
+    gap: 8,
+    opacity: 0.7,
+  },
+  infoFooterTexto: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    flex: 1,
+    lineHeight: 16,
+  },
 });
 
 export default styles;
-
-

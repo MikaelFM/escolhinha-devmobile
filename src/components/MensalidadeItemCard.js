@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../constants/colors';
 
 export default function MensalidadeItemCard({
   styles,
@@ -14,7 +15,7 @@ export default function MensalidadeItemCard({
 
   return (
     <View style={[styles.cardMensalidade, !isPago && styles.cardPendente]}>
-      <View style={[styles.iconWrapper, { backgroundColor: isPago ? '#f0fdf4' : '#fff7ed' }]}>
+      <View style={[styles.iconWrapper, { backgroundColor: isPago ? colors.successLight : colors.warningLight }]}>
         <Ionicons
           name={isPago ? 'checkmark-circle-outline' : 'alert-circle-outline'}
           size={24}
@@ -37,9 +38,9 @@ export default function MensalidadeItemCard({
           disabled={pixLoading}
         >
           {pixLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator size="small" color={colors.textInverted} />
           ) : (
-            <Ionicons name="copy-outline" size={18} color="#fff" />
+            <Ionicons name="copy-outline" size={18} color={colors.textInverted} />
           )}
           <Text style={styles.btnPixTexto}>{pixLoading ? 'Gerando...' : 'PIX'}</Text>
         </TouchableOpacity>

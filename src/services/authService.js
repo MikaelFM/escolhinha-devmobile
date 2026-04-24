@@ -21,7 +21,6 @@ const obterExpoPushToken = async () => {
 
     return null;
   } catch (notificationError) {
-    console.log('Falha ao obter token de push:', notificationError);
     return null;
   }
 };
@@ -117,7 +116,6 @@ export const authService = {
       });
 
       if (resposta.token) {
-        console.log('Salvando token...')
         await tokenService.salvarToken(
           resposta.token,
           resposta.user || null
@@ -126,7 +124,6 @@ export const authService = {
         try {
           await authService.ativarLoginBiometria(resposta.user || null);
         } catch (erroBiometria) {
-          console.log('Não foi possível ativar login biométrico:', erroBiometria?.message || erroBiometria);
         }
       }
 
@@ -160,18 +157,8 @@ export const authService = {
    * Logout
    */
   logout: async () => {
-    try {
-      try {
-        await api.post('/auth/logout');
-      } catch (erro) {
-        console.warn('Erro ao notificar logout no servidor:', erro);
-      }
-
-      await tokenService.logout();
-      return true;
-    } catch (erro) {
-      throw erro;
-    }
+    await tokenService.logout();
+    return true;
   },
 
   /**
@@ -192,6 +179,14 @@ export const authService = {
     } catch (erro) {
       throw erro;
     }
+  },
+
+  /**
+   * Buscar dados do usuário para dashboards
+   */
+  getDadosUsuario: async () => {
+    const resposta = await api.get('/get_dados_usuario');
+    return resposta?.usuario ?? resposta?.data?.usuario ?? resposta;
   },
 
   /**

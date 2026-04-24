@@ -1,61 +1,77 @@
-﻿import React from 'react';
+﻿import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
   SafeAreaView,
   ScrollView,
-  StatusBar
+  StatusBar,
+  RefreshControl,
 } from 'react-native';
-import { colors } from '../../global/colors';
 import { useNavigation } from '@react-navigation/native';
+import { colors } from '../../constants/colors';
 import { useAuth } from '../../contexts/AuthContext';
 import DashboardSummaryCard from '../../components/DashboardSummaryCard';
 import DashboardShortcutItem from '../../components/DashboardShortcutItem';
 import styles from './styles';
 
-const VERDE = '#16a34a';
-
 export default function DashboardAluno() {
   const navigation = useNavigation();
-  const { userData } = useAuth();
+  const { userData, atualizarDadosUsuario } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const aluno = {
-    nome: 'Pedro Henrique',
-    categoria: 'Sub-13 Futebol',
-    frequencia: '85%',
-    presencasNoMes: 10,
-    totalAulasMes: 12,
-    statusMensalidade: 'Pendente',
-    valorMensalidade: 'R$ 150,00',
-    vencimento: '10/04'
-  };
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await atualizarDadosUsuario();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [atualizarDadosUsuario]);
 
-  const nomeAluno = userData?.nome || aluno.nome;
+  const dadosAluno = userData?.['0'] || {};
+
+  const nomeAluno = userData?.nome || userData?.usuario || 'Aluno';
+  const categoria = dadosAluno.nome_categoria || '';
+  const frequencia = dadosAluno.frequencia
+    ? `${parseFloat(dadosAluno.frequencia).toFixed(0)}%`
+    : '--';
+  const faltas = dadosAluno.faltas ?? '--';
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 60, paddingBottom: 30, flexGrow: 1 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 60, paddingBottom: 30, flexGrow: 1 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
+      >
         <View style={styles.topHeader}>
           <Text style={styles.saudacao}>Olá, {nomeAluno}</Text>
+          {categoria ? (
+            <View style={styles.categoriaBadge}>
+              <Text style={styles.categoriaTexto}>{categoria}</Text>
+            </View>
+          ) : null}
           <Text style={styles.subSaudacao}>Confira seu desempenho e suas pendências.</Text>
         </View>
 
         <View style={styles.gridStats}>
           <DashboardSummaryCard
             styles={styles}
-            titulo="Frequência" 
-            valor={aluno.frequencia} 
-            icone="trending-up" 
-            corIcone={VERDE} 
+            titulo="Frequência"
+            valor={frequencia}
+            icone="trending-up"
+            corIcone={colors.success}
+            corFundoIcone={colors.successLight}
           />
           <DashboardSummaryCard
             styles={styles}
-            titulo="Presenças" 
-            valor={`${aluno.presencasNoMes}/${aluno.totalAulasMes}`} 
-            icone="calendar" 
-            corIcone={colors.primary} 
+            titulo="Faltas"
+            valor={String(faltas)}
+            icone="close-circle-outline"
+            corIcone={colors.error}
+            corFundoIcone={colors.errorLight}
           />
         </View>
 
@@ -64,23 +80,23 @@ export default function DashboardAluno() {
           <View style={styles.gridAcoes}>
             <DashboardShortcutItem
               styles={styles}
-              icone="list-outline"
-              titulo="Minhas Faltas"
+              icone="calendar-outline"
+              titulo="Frequência"
               primeiro
-              onPress={() => navigation.navigate('HistoricoPresencas')}
+              onPress={() => navigation.navigate('historicoPresencasGeral')}
             />
             <DashboardShortcutItem
               styles={styles}
-              icone="time-outline"
-              titulo="Horários"
-              onPress={() => navigation.navigate('GradeHorarios')}
+              icone="card-outline"
+              titulo="Mensalidades"
+              onPress={() => navigation.navigate('historicoPagamentosAluno')}
             />
             <DashboardShortcutItem
               styles={styles}
-              icone="document-text-outline"
-              titulo="Recibos"
+              icone="settings-outline"
+              titulo="Ajustes"
               ultimo
-              onPress={() => navigation.navigate('Recibos')}
+              onPress={() => navigation.navigate('configuracoesAluno')}
             />
           </View>
         </View>

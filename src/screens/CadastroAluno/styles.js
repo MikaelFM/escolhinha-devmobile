@@ -1,10 +1,10 @@
-﻿import { StyleSheet } from 'react-native';
-import { colors } from '../global/colors';
+import { StyleSheet } from 'react-native';
+import { colors } from '../../constants/colors';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     paddingHorizontal: 15,
     paddingVertical: 30,
   },
@@ -12,8 +12,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-  topHeader: {
-    marginBottom: 28,
+  navBar: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingHorizontal: 15,
+    paddingVertical: 50,
+  },
+  scroll: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    paddingTop: 12,
   },
   navBar: {
     flexDirection: 'row',
@@ -21,39 +29,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  navBotaoVoltar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    backgroundColor: colors.primaryLight,
-    borderWidth: 1.5,
-    borderColor: colors.primaryBorder,
-  },
-  navTextoVoltar: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: '600',
+  topHeader: {
+    marginBottom: 40,
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 50,
-  },
-  iconeBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
+    alignItems: 'flex-start',
+    marginBottom: 34,
   },
   iconeTexto: {
     fontSize: 28,
@@ -81,10 +62,35 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-  sucessoBox: {
-    backgroundColor: '#f0fdf4',
+  requisitosCard: {
+    backgroundColor: colors.backgroundSecondary,
     borderWidth: 1,
-    borderColor: '#bbf7d0',
+    borderColor: colors.borderMedium,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginVertical: 12,
+  },
+  requisitosTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: 8,
+  },
+  requisito: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginVertical: 4,
+  },
+  requisitoTexto: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  sucessoBox: {
+    backgroundColor: colors.successLight,
+    borderWidth: 1,
+    borderColor: colors.successBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -92,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sucessoTexto: {
-    color: '#16a34a',
+    color: colors.success,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -103,19 +109,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
+  botaoSalvarConteudo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
   botaoSalvarTexto: {
-    color: '#ffffff',
+    color: colors.textInverted,
     fontSize: 17,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: colors.overlayLight,
     justifyContent: 'flex-end',
   },
   modalBox: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 20,
@@ -143,7 +155,7 @@ const styles = StyleSheet.create({
   },
   modalItemTexto: {
     fontSize: 15,
-    color: '#334155',
+    color: colors.textStrong,
     fontWeight: '500',
   },
   modalItemTextoAtivo: {
@@ -157,10 +169,8 @@ const styles = StyleSheet.create({
   },
   separador: {
     height: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: colors.backgroundTertiary,
   },
 });
 
 export default styles;
-
-

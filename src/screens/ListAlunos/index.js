@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,11 @@ import {
   ScrollView,
   FlatList,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 
-import { colors } from '../../global/colors';
+import { colors } from '../../constants/colors';
 import { useNavigation } from '@react-navigation/native';
 import { alunosService } from '../../services';
 import { categoriasService } from '../../services/categoriasService';
@@ -51,12 +52,23 @@ const extrairPaginacao = (resposta, pageSolicitada) => {
   };
 };
 
-export default function ListaAlunos() {
+const possuiPendencias = (valor) => {
+  if (typeof valor === 'boolean') return valor;
+  if (typeof valor === 'number') return valor === 1;
+  if (typeof valor === 'string') {
+    const texto = valor.trim().toLowerCase();
+    return texto === '1' || texto === 'true';
+  }
+  return false;
+};
+
+export default function ListaAlunos({ route }) {
   const navigation = useNavigation();
   const [alunos, setAlunos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [carregandoInicial, setCarregandoInicial] = useState(true);
   const [carregandoMais, setCarregandoMais] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [erro, setErro] = useState(null);
   const [busca, setBusca] = useState('');
   const [buscaDebounced, setBuscaDebounced] = useState('');
@@ -110,7 +122,6 @@ export default function ListaAlunos() {
       const resposta = await categoriasService.listarCategorias();
       setCategorias(extrairListaCategorias(resposta));
     } catch (error) {
-      console.log('Erro ao carregar categorias:', error);
     }
   };
 
@@ -170,7 +181,6 @@ export default function ListaAlunos() {
         return;
       }
 
-      console.log('Erro ao carregar alunos:', error);
       setErro(error.message || 'Erro ao carregar alunos.');
 
       if (!append) {
@@ -190,8 +200,14 @@ export default function ListaAlunos() {
 
       setCarregandoInicial(false);
       setCarregandoMais(false);
+      setRefreshing(false);
     }
   };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    carregarAlunos({ page: 1, append: false });
+  }, [buscaDebounced, categoriaSelecionadaId, tabAtiva]);
 
   useEffect(() => {
     if (!TABS_STATUS.includes(tabAtiva) && !categoriaSelecionadaId && categorias.length === 0) {
@@ -213,6 +229,15 @@ export default function ListaAlunos() {
 
     carregarAlunos({ page: 1, append: false });
   }, [buscaDebounced, categoriaSelecionadaId, tabAtiva]);
+
+  useEffect(() => {
+    const refreshKey = route?.params?.refreshKey;
+    if (!refreshKey) {
+      return;
+    }
+
+    carregarAlunos({ page: 1, append: false });
+  }, [route?.params?.refreshKey]);
 
   const handleCarregarMais = () => {
     if (carregandoInicial || carregandoMais) {
@@ -239,125 +264,135 @@ export default function ListaAlunos() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.titulo}>Alunos</Text>
-        </View>
-        <TouchableOpacity 
-          style={styles.botaoAdicionar}
-          onPress={() => navigation.navigate('cadastroAluno')}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="add" size={28} color="#fff" />
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.buscaWrapper}>
-        <Ionicons name="search-outline" size={20} color="#94a3b8" />
-        <TextInput
-          style={styles.buscaInput}
-          placeholder="Buscar por nome..."
-          placeholderTextColor="#94a3b8"
-          value={busca}
-          onChangeText={setBusca}
-          autoCapitalize="none"
-        />
-        {busca.length > 0 && (
-          <TouchableOpacity onPress={() => setBusca('')}>
-            <Ionicons name="close-circle" size={18} color="#cbd5e1" />
+      <ScrollView
+        style={styles.screenScroll}
+        contentContainerStyle={styles.screenContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.titulo}>Alunos</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.botaoAdicionar}
+            onPress={() => navigation.navigate('cadastroAluno')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="add" size={28} color={colors.textInverted} />
           </TouchableOpacity>
-        )}
-      </View>
-
-      <View style={{ height: 55, marginTop: 15 }}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabsContainer}
-        >
-          {tabs.map(tab => (
-            <TouchableOpacity
-              key={tab}
-              style={[styles.tab, tabAtiva === tab && styles.tabAtiva]}
-              onPress={() => setTabAtiva(tab)}
-            >
-              <Text style={[styles.tabTexto, tabAtiva === tab && styles.tabTextoAtivo]}>{tab}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      <View style={styles.bottomSheet}>
-        <View style={styles.secaoHeader}>
-          <Text style={styles.secaoTitulo}>
-            {tabAtiva === 'Todos' ? 'Todos os alunos' : `Filtrando: ${tabAtiva}`}
-          </Text>
-          <Text style={styles.contadorAlunos}>{paginacao.totalItens} alunos</Text>
         </View>
 
-        {erro ? (
-          <View style={styles.erroContainer}>
-            <Ionicons name="alert-circle" size={48} color="#dc2626" />
-            <Text style={styles.erroTexto}>{erro}</Text>
-            <TouchableOpacity
-              style={styles.botaoTentar}
-              onPress={() => carregarAlunos({ page: 1, append: false })}
-            >
-              <Text style={styles.botaoTentarTexto}>Tentar novamente</Text>
-            </TouchableOpacity>
-          </View>
-        ) : carregandoInicial ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.primaryMedium} />
-            <Text style={styles.loadingText}>Carregando dados...</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={alunos}
-            keyExtractor={(item, index) => String(item?.rg_aluno || item?.rg || index) + '-' + index}
-            renderItem={({ item }) => {
-              const nomeAluno = item?.nome || 'Aluno sem nome';
-              const emDia = Number(item?.mensalidade ?? 0) === 0;
-              const categoriaAluno = getCategoriaNome(item);
-              const responsavel = item?.nome_responsavel;
-              const frequencia = Number(item?.frequencia ?? 0);
-              const faltas = Number(item?.faltas ?? 0);
-
-              return (
-                <AlunoListCard
-                  styles={styles}
-                  nomeAluno={nomeAluno}
-                  categoriaAluno={categoriaAluno}
-                  responsavel={responsavel}
-                  emDia={emDia}
-                  frequencia={frequencia}
-                  faltas={faltas}
-                  onPress={() => navigation.navigate('fichaAluno', { rg: item?.rg_aluno || item?.rg })}
-                />
-              );
-            }}
-            contentContainerStyle={styles.lista}
-            showsVerticalScrollIndicator={false}
-            onEndReached={handleCarregarMais}
-            onEndReachedThreshold={0.25}
-            ListFooterComponent={
-              carregandoMais ? (
-                <View style={styles.footerLoading}>
-                  <ActivityIndicator size="small" color={colors.primaryMedium} />
-                </View>
-              ) : null
-            }
-            ListEmptyComponent={
-              <View style={styles.vazio}>
-                <Ionicons name="search-outline" size={48} color="#cbd5e1" />
-                <Text style={styles.vazioTexto}>Nenhum aluno encontrado</Text>
-                <Text style={styles.vazioSub}>Tente ajustar sua busca ou filtros.</Text>
-              </View>
-            }
+        <View style={styles.buscaWrapper}>
+          <Ionicons name="search-outline" size={20} color={colors.textPlaceholder} />
+          <TextInput
+            style={styles.buscaInput}
+            placeholder="Buscar por nome..."
+            placeholderTextColor={colors.textPlaceholder}
+            value={busca}
+            onChangeText={setBusca}
+            autoCapitalize="none"
           />
-        )}
-      </View>
+          {busca.length > 0 && (
+            <TouchableOpacity onPress={() => setBusca('')}>
+              <Ionicons name="close-circle" size={18} color={colors.borderStrong} />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={{ height: 55, marginTop: 15 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsContainer}
+          >
+            {tabs.map(tab => (
+              <TouchableOpacity
+                key={tab}
+                style={[styles.tab, tabAtiva === tab && styles.tabAtiva]}
+                onPress={() => setTabAtiva(tab)}
+              >
+                <Text style={[styles.tabTexto, tabAtiva === tab && styles.tabTextoAtivo]}>{tab}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.bottomSheet}>
+          <View style={styles.secaoHeader}>
+            <Text style={styles.secaoTitulo}>
+              {tabAtiva === 'Todos' ? 'Todos os alunos' : `Filtrando: ${tabAtiva}`}
+            </Text>
+            <Text style={styles.contadorAlunos}>{paginacao.totalItens} alunos</Text>
+          </View>
+
+          {erro ? (
+            <View style={styles.erroContainer}>
+              <Ionicons name="alert-circle" size={48} color={colors.error} />
+              <Text style={styles.erroTexto}>{erro}</Text>
+              <TouchableOpacity
+                style={styles.botaoTentar}
+                onPress={() => carregarAlunos({ page: 1, append: false })}
+              >
+                <Text style={styles.botaoTentarTexto}>Tentar novamente</Text>
+              </TouchableOpacity>
+            </View>
+          ) : carregandoInicial ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.primaryMedium} />
+              <Text style={styles.loadingText}>Carregando dados...</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={alunos}
+              keyExtractor={(item, index) => String(item?.rg_aluno || item?.rg || index) + '-' + index}
+              renderItem={({ item }) => {
+                const nomeAluno = item?.nome || 'Aluno sem nome';
+                const emDia = item?.possui_pendencias != null
+                  ? !possuiPendencias(item.possui_pendencias)
+                  : Number(item?.mensalidade ?? 0) === 0;
+                const categoriaAluno = getCategoriaNome(item);
+                const responsavel = item?.nome_responsavel;
+                const frequencia = Number(item?.frequencia ?? 0);
+                const faltas = Number(item?.faltas ?? 0);
+
+                return (
+                  <AlunoListCard
+                    styles={styles}
+                    nomeAluno={nomeAluno}
+                    categoriaAluno={categoriaAluno}
+                    responsavel={responsavel}
+                    emDia={emDia}
+                    frequencia={frequencia}
+                    faltas={faltas}
+                    onPress={() => navigation.navigate('fichaAluno', { rg: item?.rg_aluno || item?.rg })}
+                  />
+                );
+              }}
+              contentContainerStyle={styles.lista}
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false}
+              onEndReached={handleCarregarMais}
+              onEndReachedThreshold={0.25}
+              ListFooterComponent={
+                carregandoMais ? (
+                  <View style={styles.footerLoading}>
+                    <ActivityIndicator size="small" color={colors.primaryMedium} />
+                  </View>
+                ) : null
+              }
+              ListEmptyComponent={
+                <View style={styles.vazio}>
+                  <Ionicons name="search-outline" size={48} color={colors.borderStrong} />
+                  <Text style={styles.vazioTexto}>Nenhum aluno encontrado</Text>
+                  <Text style={styles.vazioSub}>Tente ajustar sua busca ou filtros.</Text>
+                </View>
+              }
+            />
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

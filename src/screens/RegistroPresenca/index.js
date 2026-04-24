@@ -1,17 +1,15 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   SafeAreaView,
   FlatList,
   TouchableOpacity,
-  Alert,
-  Modal,
-  Platform
+  RefreshControl,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { colors } from '../../global/colors';
+import { colors } from '../../constants/colors';
 import InputField from '../../components/InputField';
+import AppAlertModal from '../../components/AppAlertModal';
 import {
   formatarDataBR,
   converterDataBRParaDate,
@@ -21,11 +19,10 @@ import {
 import RegistroAlunoCard from '../../components/RegistroAlunoCard';
 import { categoriasService } from '../../services/categoriasService';
 import { presencaService } from '../../services/presencaService';
+import ModalDatePicker from './ModalDatePicker';
 import styles from './styles';
 
 const CRIAR_NOVA_DATA = 'Criar nova data';
-const VERDE = '#16a34a';
-const VERMELHO = '#dc2626';
 
 const gerarChaveAlunoPresenca = (item, index) => {
   const id = item?.id ?? 'sem-id';
@@ -47,55 +44,53 @@ export default function RegistroPresenca() {
   const [presencasAntesEdicao, setPresencasAntesEdicao] = useState(null);
   const [pickerVisivel, setPickerVisivel] = useState(false);
   const [dataPicker, setDataPicker] = useState(new Date());
+  const [refreshing, setRefreshing] = useState(false);
+  const [alertErro, setAlertErro] = useState({ visible: false, title: '', message: '' });
+  const [alertSucesso, setAlertSucesso] = useState({ visible: false, title: '', message: '' });
 
   const categoriaSelecionada = categorias.find((item) => item.nome === categoria);
   const idCategoriaSelecionada = categoriaSelecionada?.id;
 
-  useEffect(() => {
-    const carregarCategorias = async () => {
-      try {
-        const resposta = await categoriasService.listarCategorias();
-        const listaBruta = resposta?.data ?? resposta?.categorias ?? resposta?.items ?? resposta;
-        const lista = Array.isArray(listaBruta)
-          ? listaBruta
-              .map((item) => {
-                const nome = item?.nome_categoria ?? item?.nome ?? item?.categoria;
-                const id = item?.id_categoria ?? item?.id ?? null;
-                return nome ? { id, nome } : null;
-              })
-              .filter(Boolean)
-          : [];
+  const carregarCategorias = useCallback(async () => {
+    try {
+      const resposta = await categoriasService.listarCategorias();
+      const listaBruta = resposta?.data ?? resposta?.categorias ?? resposta?.items ?? resposta;
+      const lista = Array.isArray(listaBruta)
+        ? listaBruta
+            .map((item) => {
+              const nome = item?.nome_categoria ?? item?.nome ?? item?.categoria;
+              const id = item?.id_categoria ?? item?.id ?? null;
+              return nome ? { id, nome } : null;
+            })
+            .filter(Boolean)
+        : [];
 
-        if (lista.length > 0) {
-          setCategorias(lista);
-        }
-      } catch (error) {
-        console.log('Erro ao carregar categorias:', error);
+      if (lista.length > 0) {
+        setCategorias(lista);
       }
-    };
-    carregarCategorias();
+    } catch (error) {
+    }
   }, []);
 
-  useEffect(() => {
-    const carregarDatasLancadas = async () => {
-      try {
-        const resposta = await presencaService.listarDatasPresenca();
-        const listaBruta = resposta?.datas ?? resposta?.data?.datas ?? resposta?.data ?? [];
-        const datas = Array.isArray(listaBruta)
-          ? listaBruta
-              .map((item) => formatarIsoParaBr(item?.data_presenca ?? item?.data ?? item))
-              .filter(Boolean)
-          : [];
+  const carregarDatasLancadas = useCallback(async () => {
+    try {
+      const resposta = await presencaService.listarDatasPresenca();
+      const listaBruta = resposta?.datas ?? resposta?.data?.datas ?? resposta?.data ?? [];
+      const datas = Array.isArray(listaBruta)
+        ? listaBruta
+            .map((item) => formatarIsoParaBr(item?.data_presenca ?? item?.data ?? item))
+            .filter(Boolean)
+        : [];
 
-        const novasOpcoes = datas.includes(dataAtual) ? datas : [dataAtual, ...datas];
-        setDatasOpcoes(novasOpcoes);
-        setDataSelecionada(dataAtual);
-      } catch (error) {
-        console.log('Erro ao carregar datas lançadas:', error);
-      }
-    };
-    carregarDatasLancadas();
-  }, []);
+      const novasOpcoes = datas.includes(dataAtual) ? datas : [dataAtual, ...datas];
+      setDatasOpcoes(novasOpcoes);
+      setDataSelecionada(dataAtual);
+    } catch (error) {
+    }
+  }, [dataAtual]);
+
+  useEffect(() => { carregarCategorias(); }, [carregarCategorias]);
+  useEffect(() => { carregarDatasLancadas(); }, [carregarDatasLancadas]);
 
   useEffect(() => {
     const carregarListaPresenca = async () => {
@@ -130,10 +125,16 @@ export default function RegistroPresenca() {
       } finally {
         setIsEditMode(false);
         setPresencasAntesEdicao(null);
+        setRefreshing(false);
       }
     };
     carregarListaPresenca();
   }, [dataSelecionada, idCategoriaSelecionada]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([carregarCategorias(), carregarDatasLancadas()]);
+  }, [carregarCategorias, carregarDatasLancadas]);
 
   const togglePresenca = (id) => {
     if (!isEditMode) return;
@@ -142,7 +143,11 @@ export default function RegistroPresenca() {
 
   const iniciarEdicaoPresenca = () => {
     if (!idCategoriaSelecionada) {
-      Alert.alert('Atenção', 'Selecione uma categoria antes de iniciar.');
+      setAlertErro({
+        visible: true,
+        title: 'Atenção',
+        message: 'Selecione uma categoria antes de iniciar.',
+      });
       return;
     }
     setPresencasAntesEdicao({ ...presencas });
@@ -168,7 +173,11 @@ export default function RegistroPresenca() {
     if (isSaving) return;
     const dataApi = formatarBrParaIsoCurta(dataSelecionada);
     if (!dataApi || !idCategoriaSelecionada) {
-      Alert.alert('Atenção', 'Data e categoria são obrigatórios.');
+      setAlertErro({
+        visible: true,
+        title: 'Atenção',
+        message: 'Data e categoria são obrigatórios.',
+      });
       return;
     }
     const alunosPayload = alunos
@@ -178,7 +187,11 @@ export default function RegistroPresenca() {
         presente: !!presencas[aluno.id],
       }));
     if (alunosPayload.length === 0) {
-      Alert.alert('Atenção', 'Nenhum aluno encontrado para salvar.');
+      setAlertErro({
+        visible: true,
+        title: 'Atenção',
+        message: 'Nenhum aluno encontrado para salvar.',
+      });
       return;
     }
     setIsSaving(true);
@@ -186,11 +199,19 @@ export default function RegistroPresenca() {
       presenca: { data_presenca: dataApi, id_categoria: idCategoriaSelecionada, alunos: alunosPayload }
     })
     .then(async () => {
-      Alert.alert('Sucesso', 'Chamada salva com sucesso!');
+      setAlertSucesso({
+        visible: true,
+        title: 'Sucesso',
+        message: 'Chamada salva com sucesso!',
+      });
       setIsEditMode(false);
     })
     .catch((error) => {
-      Alert.alert('Erro', error?.message || 'Erro ao salvar.');
+      setAlertErro({
+        visible: true,
+        title: 'Erro',
+        message: error?.message || 'Erro ao salvar.',
+      });
     })
     .finally(() => setIsSaving(false));
   };
@@ -239,6 +260,7 @@ export default function RegistroPresenca() {
       <FlatList
         data={alunos}
         keyExtractor={item => item.id}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
         renderItem={({ item }) => {
           const statusConhecido = Object.prototype.hasOwnProperty.call(presencas, item.id);
           const isPresente = presencas[item.id] === true;
@@ -275,21 +297,34 @@ export default function RegistroPresenca() {
         )}
       </View>
 
-      <Modal visible={pickerVisivel} transparent animationType="fade">
-        <DateTimePicker
-          value={dataPicker}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
-          onChange={(_, selectedDate) => {
-            if (selectedDate) {
-              const novaData = formatarDataBR(selectedDate);
-              setDataSelecionada(novaData);
-              setDatasOpcoes(prev => prev.includes(novaData) ? prev : [novaData, ...prev]);
-              setPickerVisivel(false);
-            }
-          }}
-        />
-      </Modal>
+      <ModalDatePicker
+        visible={pickerVisivel}
+        dataPicker={dataPicker}
+        onChange={(_, selectedDate) => {
+          if (selectedDate) {
+            const novaData = formatarDataBR(selectedDate);
+            setDataSelecionada(novaData);
+            setDatasOpcoes(prev => prev.includes(novaData) ? prev : [novaData, ...prev]);
+            setPickerVisivel(false);
+          }
+        }}
+      />
+
+      <AppAlertModal
+        visible={alertErro.visible}
+        title={alertErro.title}
+        message={alertErro.message}
+        variant="error"
+        onRequestClose={() => setAlertErro({ visible: false, title: '', message: '' })}
+      />
+
+      <AppAlertModal
+        visible={alertSucesso.visible}
+        title={alertSucesso.title}
+        message={alertSucesso.message}
+        variant="success"
+        onRequestClose={() => setAlertSucesso({ visible: false, title: '', message: '' })}
+      />
     </SafeAreaView>
   );
 }

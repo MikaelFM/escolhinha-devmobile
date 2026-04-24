@@ -1,27 +1,20 @@
-﻿import { StyleSheet } from 'react-native';
-import { colors } from '../global/colors';
+import { StyleSheet } from 'react-native';
+import { colors } from '../../constants/colors';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     paddingHorizontal: 15,
     paddingVertical: 30,
   },
   scroll: {
     paddingHorizontal: 20,
     paddingBottom: 40,
-  },
-  navBar: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 15,
-    paddingVertical: 50,
-  },
-  scroll: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
     paddingTop: 12,
+  },
+  topHeader: {
+    marginBottom: 28,
   },
   navBar: {
     flexDirection: 'row',
@@ -29,9 +22,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  navBotaoVoltar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: colors.primaryLight,
+    borderWidth: 1.5,
+    borderColor: colors.primaryBorder,
+  },
+  navTextoVoltar: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '600',
+  },
   header: {
     alignItems: 'flex-start',
-    marginBottom: 34,
+    marginBottom: 40,
+  },
+  iconeBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
   iconeTexto: {
     fontSize: 28,
@@ -45,7 +68,7 @@ const styles = StyleSheet.create({
   },
   subtitulo: {
     fontSize: 14,
-    color: '#64748b',
+    color: colors.textSecondary,
     fontWeight: '400',
   },
   loadingContainer: {
@@ -59,35 +82,10 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-  requisitosCard: {
-    backgroundColor: '#f8fafc',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginVertical: 12,
-  },
-  requisitosTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.primary,
-    marginBottom: 8,
-  },
-  requisito: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginVertical: 4,
-  },
-  requisitoTexto: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
   sucessoBox: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: colors.successLight,
     borderWidth: 1,
-    borderColor: '#bbf7d0',
+    borderColor: colors.successBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -95,7 +93,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sucessoTexto: {
-    color: '#16a34a',
+    color: colors.success,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -106,14 +104,68 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
+  botaoSalvarConteudo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
   botaoSalvarTexto: {
-    color: '#ffffff',
+    color: colors.textInverted,
     fontSize: 17,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalBox: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    maxHeight: '60%',
+  },
+  modalTitulo: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+  },
+  modalItemAtivo: {
+    backgroundColor: colors.primaryBorder,
+  },
+  modalItemTexto: {
+    fontSize: 15,
+    color: colors.textStrong,
+    fontWeight: '500',
+  },
+  modalItemTextoAtivo: {
+    color: colors.primary,
+    fontWeight: '700',
+  },
+  modalCheck: {
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: '700',
+  },
+  separador: {
+    height: 1,
+    backgroundColor: colors.borderLight,
+  },
 });
 
 export default styles;
-
-

@@ -5,35 +5,37 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
-import { colors } from '../../global/colors';
-import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../../constants/colors';
 import InputField from '../../components/InputField';
 import { authService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
+import AppAlertModal from '../../components/AppAlertModal';
 import styles from './styles';
 
 export default function AlteracaoSenha({ navigation }) {
   const [senhaAtual, setSenhaAtual] = useState('');
   const [senhaNova, setSenhaNova] = useState('');
   const [senhaNovaConfirm, setSenhaNovaConfirm] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [erros, setErros] = useState({});
-  const [sucesso, setSucesso] = useState(false);
+  const [alertErro, setAlertErro] = useState({ visible: false, title: '', message: '' });
+  const [alertSucesso, setAlertSucesso] = useState({ visible: false, title: '', message: '' });
   const { userData } = useAuth();
 
   const validarSenha = (senha) => {
-    const temMaipuscula = /[A-Z]/.test(senha);
+    const temMaiuscula = /[A-Z]/.test(senha);
     const temMinuscula = /[a-z]/.test(senha);
     const temNumero = /[0-9]/.test(senha);
     const temEspacoOuCaractereEspecial = /[\s]/.test(senha);
 
     return {
-      valida: temMaipuscula && temMinuscula && temNumero && !temEspacoOuCaractereEspecial && senha.length >= 8,
+      valida: temMaiuscula && temMinuscula && temNumero && !temEspacoOuCaractereEspecial && senha.length >= 8,
       erros: [
-        !temMaipuscula ? 'Mínimo 1 letra maiúscula' : null,
+        !temMaiuscula ? 'Mínimo 1 letra maiúscula' : null,
         !temMinuscula ? 'Mínimo 1 letra minúscula' : null,
         !temNumero ? 'Mínimo 1 número' : null,
         temEspacoOuCaractereEspecial ? 'Sem espaços em branco' : null,
@@ -82,13 +84,17 @@ export default function AlteracaoSenha({ navigation }) {
   };
 
   const handleAlterarSenha = async () => {
+    if (isSaving) {
+      return;
+    }
+
     if (!validar()) {
       return;
     }
 
     try {
-      setLoading(true);
-      setSucesso(false);
+      setIsSaving(true);
+      let atualizouComSucesso = false;
 
       await authService.atualizarSenha(
         userData?.id,
@@ -96,53 +102,48 @@ export default function AlteracaoSenha({ navigation }) {
         senhaNova
       );
 
-      setSucesso(true);
       setSenhaAtual('');
       setSenhaNova('');
       setSenhaNovaConfirm('');
 
-      setTimeout(() => {
-        navigation.goBack();
-      }, 1500);
+      atualizouComSucesso = true;
+
+      setAlertSucesso({
+        visible: true,
+        title: 'Senha alterada com sucesso',
+        message: 'Sua senha foi atualizada com sucesso.',
+      });
+
+      return atualizouComSucesso;
     } catch (erro) {
       const mensagem = erro?.response?.data?.mensagem || erro?.message || 'Erro ao alterar senha';
-      Alert.alert('Erro', mensagem);
+      setAlertErro({
+        visible: true,
+        title: 'Erro',
+        message: mensagem,
+      });
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
-  };
-
-  const handleCancelar = () => {
-    setSenhaAtual('');
-    setSenhaNova('');
-    setSenhaNovaConfirm('');
-    setErros({});
-    setSucesso(false);
-    navigation.goBack();
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading && !sucesso ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Atualizando senha...</Text>
-        </View>
-      ) : (
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={110}
+      >
         <ScrollView
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          
-
-          {/* HEADER */}
           <View style={styles.header}>
             <Text style={styles.titulo}>Alterar Senha</Text>
             <Text style={styles.subtitulo}>Mantenha sua conta segura</Text>
           </View>
 
-          {/* INPUTS */}
           <InputField
             label="Senha Atual"
             obrigatorio
@@ -173,22 +174,44 @@ export default function AlteracaoSenha({ navigation }) {
             variante="senha"
           />
 
-          {sucesso && (
-            <View style={styles.sucessoBox}>
-              <Text style={styles.sucessoTexto}>✓ Senha alterada com sucesso!</Text>
-            </View>
-          )}
-
           <TouchableOpacity
-            style={styles.botaoSalvar}
+            style={[styles.botaoSalvar, isSaving ? { opacity: 0.8 } : null]}
             activeOpacity={0.85}
             onPress={handleAlterarSenha}
-            disabled={loading}
+            disabled={isSaving}
           >
-            <Text style={styles.botaoSalvarTexto}>Alterar Senha</Text>
+            {isSaving ? (
+              <View style={styles.botaoSalvarConteudo}>
+                <ActivityIndicator size="small" color={colors.textInverted} />
+                <Text style={styles.botaoSalvarTexto}>Salvando...</Text>
+              </View>
+            ) : (
+              <Text style={styles.botaoSalvarTexto}>Alterar Senha</Text>
+            )}
           </TouchableOpacity>
         </ScrollView>
-      )}
+      </KeyboardAvoidingView>
+
+      <AppAlertModal
+        visible={alertErro.visible}
+        title={alertErro.title}
+        message={alertErro.message}
+        variant="error"
+        onRequestClose={() => setAlertErro({ visible: false, title: '', message: '' })}
+      />
+
+      <AppAlertModal
+        visible={alertSucesso.visible}
+        title={alertSucesso.title}
+        message={alertSucesso.message}
+        variant="success"
+        onRequestClose={() => {
+          setAlertSucesso({ visible: false, title: '', message: '' });
+          if (navigation?.canGoBack?.()) {
+            navigation.goBack();
+          }
+        }}
+      />
     </SafeAreaView>
   );
 }

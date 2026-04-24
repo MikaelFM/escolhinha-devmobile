@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Routes from './src/navigation/routes';
 import Login from './src/screens/Login';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { colors } from './src/constants/colors';
 
 const Stack = createStackNavigator();
 
@@ -14,7 +15,7 @@ function RootNavigation() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2B9D48" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }

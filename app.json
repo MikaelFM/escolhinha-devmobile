@@ -4,10 +4,10 @@
     "slug": "devmobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/images/assets/icon.png",
+    "icon": "./src/assets/images/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./src/images/assets/splash-icon.png",
+      "image": "./src/assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,9 +17,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./src/images/assets/android-icon-foreground.png",
-        "backgroundImage": "./src/images/assets/android-icon-background.png",
-        "monochromeImage": "./src/images/assets/android-icon-monochrome.png"
+        "foregroundImage": "./src/assets/images/android-icon-foreground.png",
+        "backgroundImage": "./src/assets/images/android-icon-background.png",
+        "monochromeImage": "./src/assets/images/android-icon-monochrome.png"
       },
       "package": "com.anonymous.devmobile",
       "googleServicesFile": "./google-services.json"
@@ -28,7 +28,7 @@
       "backgroundColor": "#000000"
     },
     "web": {
-      "favicon": "./src/images/assets/favicon.png"
+      "favicon": "./src/assets/images/favicon.png"
     },
     "extra": {
       "eas": {

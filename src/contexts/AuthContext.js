@@ -68,7 +68,6 @@ export const AuthProvider = ({ children }) => {
           dispatch({ type: 'SIGN_OUT' });
         }
       } catch (erro) {
-        console.log('Erro ao restaurar token:', erro);
         dispatch({ type: 'SIGN_OUT' });
       }
     };
@@ -207,11 +206,37 @@ export const AuthProvider = ({ children }) => {
         }
       },
 
+      atualizarDadosUsuario: async () => {
+        try {
+          const dadosAtualizados = await authService.getDadosUsuario();
+          const userDataMesclado = {
+            ...(state.userData || {}),
+            ...(dadosAtualizados || {}),
+          };
+
+          dispatch({
+            type: 'SIGN_IN',
+            payload: {
+              token: state.userToken,
+              userData: userDataMesclado,
+            },
+          });
+
+          if (state.userToken) {
+            await tokenService.salvarToken(state.userToken, userDataMesclado);
+          }
+
+          return userDataMesclado;
+        } catch (erro) {
+          return null;
+        }
+      },
+
       obterDadosUsuario: async () => {
         return await tokenService.obterDadosUsuario();
       },
     }),
-    [state.userToken]
+    [state.userToken, state.userData]
   );
 
   return (

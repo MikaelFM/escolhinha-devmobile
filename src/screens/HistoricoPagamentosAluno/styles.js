@@ -1,13 +1,72 @@
-﻿import { StyleSheet } from 'react-native';
-import { colors } from '../../global/colors';
+import { StyleSheet, Dimensions } from 'react-native';
+import { colors } from '../../constants/colors';
 
-const VERDE = '#16a34a';
-const VERMELHO = '#dc2626';
-const AZUL_CLARO = '#e0f2fe';
-const LARANJA = '#f59e0b';
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    marginBottom: 20,
+  },
+  backBtn: {
+    marginLeft: -10,
+    marginBottom: 10,
+  },
+  titulo: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: colors.primaryDark,
+    letterSpacing: -0.5,
+    marginTop: 40,
+  },
+  subtitulo: {
+    fontSize: 14,
+    color: colors.textPlaceholder,
+    marginTop: 4,
+  },
+
+  gridStats: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  cardResumo: {
+    width: (width / 2) - 28,
+    backgroundColor: colors.background,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.primaryBorder,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textPlaceholder,
+    textTransform: 'uppercase',
+  },
+  cardValor: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.primaryDark,
+  },
+
   bottomSheet: {
     backgroundColor: colors.background,
     borderTopLeftRadius: 28,
@@ -15,48 +74,29 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingTop: 12,
     paddingBottom: 24,
-    shadowColor: colors.textPlaceholder,
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: -8 },
-    elevation: 20,
   },
-  header: { paddingHorizontal: 20, paddingTop: 60, marginBottom: 20 },
-  backBtn: { marginLeft: -10, marginBottom: 10 },
-  titulo: { fontSize: 32, fontWeight: '800', color: colors.primary, letterSpacing: -0.5 },
-  subtitulo: { fontSize: 14, color: colors.textPlaceholder, marginTop: 4 },
-
-  resumoCard: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    padding: 20,
-    backgroundColor: '#f8fafc',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 25,
-  },
-  resumoItem: { flex: 1, alignItems: 'center' },
-  resumoLabel: { fontSize: 9, fontWeight: '900', color: colors.textPlaceholder, letterSpacing: 1, marginBottom: 5 },
-  resumoValor: { fontSize: 16, fontWeight: '800', color: colors.primary },
-  divisor: { width: 1, backgroundColor: '#e2e8f0', height: '100%' },
-
   secaoTitulo: {
-    fontSize: 11, fontWeight: '900', color: colors.textPlaceholder,
-    marginLeft: 20, marginBottom: 15, letterSpacing: 1,
+    fontSize: 11,
+    fontWeight: '900',
+    color: colors.textPlaceholder,
+    marginLeft: 20,
+    marginBottom: 15,
+    letterSpacing: 1,
   },
 
-  listaContainer: { marginHorizontal: 20 },
+  listaContainer: {
+    marginHorizontal: 20,
+  },
   cardMensalidade: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
-    paddingHorizontal: 5,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: colors.borderLight,
+    paddingHorizontal: 10,
   },
   cardPendente: {
-    backgroundColor: '#fffcf9',
+    backgroundColor: colors.warningVeryLight,
     borderRadius: 12,
     paddingHorizontal: 10,
     borderBottomWidth: 0,
@@ -69,12 +109,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mesTitulo: { fontSize: 16, fontWeight: '700', color: colors.primary },
-  valorSubtitulo: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-  pixInfo: { fontSize: 11, fontWeight: '700', color: '#0f766e', marginTop: 3 },
+  mesTitulo: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.primaryDark,
+  },
+  valorSubtitulo: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  pixInfo: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.pix,
+    marginTop: 3,
+  },
 
   btnPix: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.amber,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -82,21 +135,53 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     gap: 5,
   },
-  btnPixTexto: { color: '#fff', fontSize: 11, fontWeight: '800' },
+  btnPixTexto: {
+    color: colors.textInverted,
+    fontSize: 11,
+    fontWeight: '800',
+  },
 
   badgePago: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
-    backgroundColor: '#f0fdf4',
+    backgroundColor: colors.successLight,
   },
-  badgePagoTexto: { fontSize: 10, fontWeight: '900', color: VERDE },
+  badgePagoTexto: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: colors.success,
+  },
 
-  loadingContainer: { paddingVertical: 25, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { marginTop: 10, color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
-  errorContainer: { paddingVertical: 25, alignItems: 'center', justifyContent: 'center' },
-  errorText: { marginTop: 10, color: VERMELHO, fontSize: 13, fontWeight: '600', textAlign: 'center' },
-  vazioTexto: { color: colors.textPlaceholder, fontSize: 13, fontWeight: '600', paddingVertical: 12 },
+  loadingContainer: {
+    paddingVertical: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  errorContainer: {
+    paddingVertical: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    marginTop: 10,
+    color: colors.error,
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  vazioTexto: {
+    color: colors.textPlaceholder,
+    fontSize: 13,
+    fontWeight: '600',
+    paddingVertical: 12,
+  },
 
   infoFooter: {
     flexDirection: 'row',
@@ -106,20 +191,26 @@ const styles = StyleSheet.create({
     gap: 8,
     opacity: 0.7,
   },
-  infoFooterTexto: { fontSize: 11, color: colors.textSecondary, flex: 1, lineHeight: 16 },
+  infoFooterTexto: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    flex: 1,
+    lineHeight: 16,
+  },
+
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     borderRadius: 20,
     padding: 30,
     width: '85%',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -151,11 +242,11 @@ const styles = StyleSheet.create({
   modalSubtitulo: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#64748b',
+    color: colors.textSecondary,
     marginBottom: 12,
   },
   linkContainer: {
-    backgroundColor: '#f0f9ff',
+    backgroundColor: colors.infoLight,
     borderRadius: 12,
     padding: 12,
     marginBottom: 20,
@@ -187,12 +278,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnFecharTexto: {
-    color: '#fff',
+    color: colors.textInverted,
     fontSize: 14,
     fontWeight: '800',
   },
 });
 
 export default styles;
-
-

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import { colors } from '../constants/colors';
 
 export default function RegistroAlunoCard({
   styles,
@@ -25,7 +26,7 @@ export default function RegistroAlunoCard({
             !statusConhecido ? styles.statusCinza : (isPresente ? styles.statusVerde : styles.statusVermelho),
           ]}
         />
-        <Text style={[styles.nomeAluno, !isPresente && statusConhecido && { color: '#991b1b' }]}>{item.nome}</Text>
+        <Text style={[styles.nomeAluno, !isPresente && statusConhecido && { color: colors.errorDark }]}>{item.nome}</Text>
         <Text style={styles.subtituloAluno}>
           {!statusConhecido ? 'Sem registro' : (isPresente ? 'Presente' : 'Faltou')}
         </Text>

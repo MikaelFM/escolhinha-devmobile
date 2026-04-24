@@ -1,36 +1,35 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
-  Clipboard,
-  Alert,
   ActivityIndicator,
-  Modal,
-  Image
+  RefreshControl,
 } from 'react-native';
-import { colors } from '../../global/colors';
+import { colors } from '../../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { mensalidadesService } from '../../services/mensalidadesService';
 import { cobrancaService } from '../../services/cobrancaService';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatarDataBR, formatarMesAno } from '../../utils/formatters';
 import MensalidadeItemCard from '../../components/MensalidadeItemCard';
+import DashboardSummaryCard from '../../components/DashboardSummaryCard';
+import AppAlertModal from '../../components/AppAlertModal';
+import ModalPixQrCode from './ModalPixQrCode';
 import styles from './styles';
 
-const VERDE = '#16a34a';
-const VERMELHO = '#dc2626';
-const LARANJA = '#f59e0b';
 
 export default function HistoricoMensalidadesAluno({ navigation, route }) {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [error, setError] = useState(null);
   const [mensalidades, setMensalidades] = useState([]);
   const [pixModalVisible, setPixModalVisible] = useState(false);
   const [pixLoading, setPixLoading] = useState(false);
   const [pixData, setPixData] = useState({ link: '', qr_code_img: '' });
+  const [alertErro, setAlertErro] = useState({ visible: false, title: '', message: '' });
   const { userData } = useAuth();
 
   const rgAluno = userData?.rg_aluno || '';
@@ -67,21 +66,21 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
 
         setMensalidades(formatadas);
       } catch (err) {
-        console.log('Erro ao carregar mensalidades:', err);
         setError(err?.message || 'Erro ao carregar mensalidades');
         setMensalidades([]);
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
     };
 
     carregarMensalidades();
-  }, [rgAluno]);
+  }, [rgAluno, refreshKey]);
 
-  const handleCopiarPix = (codigo) => {
-    Clipboard.setString(codigo);
-    Alert.alert('Pix Copiado!', 'O código Copia e Cola foi copiado para sua área de transferência.');
-  };
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setRefreshKey(k => k + 1);
+  }, []);
 
   const handleGerarCobrancaPix = async (idMensalidade) => {
     try {
@@ -94,11 +93,18 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
         setPixData({ link, qr_code_img });
         setPixModalVisible(true);
       } else {
-        Alert.alert('Erro', 'Não foi possível gerar o QR code');
+        setAlertErro({
+          visible: true,
+          title: 'Erro',
+          message: 'Não foi possível gerar o QR code',
+        });
       }
     } catch (err) {
-      console.log('Erro ao gerar cobrança PIX:', err);
-      Alert.alert('Erro', err?.message || 'Erro ao gerar cobrança PIX');
+      setAlertErro({
+        visible: true,
+        title: 'Erro',
+        message: err?.message || 'Erro ao gerar cobrança PIX',
+      });
     } finally {
       setPixLoading(false);
     }
@@ -113,25 +119,32 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
+      >
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name='chevron-back' size={28} color={colors.primary} />
-          </TouchableOpacity>
           <Text style={styles.titulo}>Mensalidades</Text>
           <Text style={styles.subtitulo}>Histórico de pagamentos e cobranças</Text>
         </View>
 
-        <View style={styles.resumoCard}>
-          <View style={styles.resumoItem}>
-            <Text style={styles.resumoLabel}>STATUS ATUAL</Text>
-            <Text style={[styles.resumoValor, { color: LARANJA }]}>{stats.pendentes} Pendente(s)</Text>
-          </View>
-          <View style={styles.divisor} />
-          <View style={styles.resumoItem}>
-            <Text style={styles.resumoLabel}>TOTAL</Text>
-            <Text style={styles.resumoValor}>{stats.total}</Text>
-          </View>
+        <View style={styles.gridStats}>
+          <DashboardSummaryCard
+            styles={styles}
+            titulo="Pendentes"
+            valor={String(stats.pendentes)}
+            icone="time-outline"
+            corIcone={colors.amber}
+            corFundoIcone={colors.warningLight}
+          />
+          <DashboardSummaryCard
+            styles={styles}
+            titulo="Total"
+            valor={String(stats.total)}
+            icone="card-outline"
+            corIcone={colors.primary}
+          />
         </View>
 
         <View style={styles.bottomSheet}>
@@ -145,7 +158,7 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
               </View>
             ) : error ? (
               <View style={styles.errorContainer}>
-                <Ionicons name='alert-circle' size={48} color={VERMELHO} />
+                <Ionicons name='alert-circle' size={48} color={colors.error} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : mensalidades.length > 0 ? (
@@ -156,8 +169,8 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
                   item={item}
                   pixLoading={pixLoading}
                   onGerarPix={handleGerarCobrancaPix}
-                  verde={VERDE}
-                  laranja={LARANJA}
+                  verde={colors.success}
+                  laranja={colors.amber}
                 />
               ))
             ) : (
@@ -174,58 +187,19 @@ export default function HistoricoMensalidadesAluno({ navigation, route }) {
         </View>
       </ScrollView>
 
-      {/* Modal PIX QR Code */}
-      <Modal
-        animationType='fade'
-        transparent={true}
+      <ModalPixQrCode
         visible={pixModalVisible}
-        onRequestClose={() => setPixModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.modalCloseBtn}
-              onPress={() => setPixModalVisible(false)}
-            >
-              <Ionicons name='close' size={24} color={colors.primary} />
-            </TouchableOpacity>
+        onClose={() => setPixModalVisible(false)}
+        pixData={pixData}
+      />
 
-            <Text style={styles.modalTitulo}>Código QR - PIX</Text>
-
-            {pixData.qr_code_img && (
-              <View style={styles.qrCodeContainer}>
-                <Image
-                  source={{ uri: `data:image/png;base64,${pixData.qr_code_img}` }}
-                  style={styles.qrCodeImage}
-                />
-              </View>
-            )}
-
-            <Text style={styles.modalSubtitulo}>Ou copie o código PIX Copia e Cola:</Text>
-
-            <View style={styles.linkContainer}>
-              <Text style={styles.linkTexto} numberOfLines={3}>
-                {pixData.link}
-              </Text>
-              <TouchableOpacity
-                style={styles.btnCopiarLink}
-                onPress={() => {
-                  Clipboard.setString(pixData.link);
-                }}
-              >
-                <Ionicons name='copy' size={18} color='#fff' />
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              style={styles.btnFechar}
-              onPress={() => setPixModalVisible(false)}
-            >
-              <Text style={styles.btnFecharTexto}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <AppAlertModal
+        visible={alertErro.visible}
+        title={alertErro.title}
+        message={alertErro.message}
+        variant="error"
+        onRequestClose={() => setAlertErro({ visible: false, title: '', message: '' })}
+      />
     </SafeAreaView>
   );
 }
